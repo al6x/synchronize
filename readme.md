@@ -1,6 +1,6 @@
 Synchronize.js allows You write asynchronous code as if it's synchronous.
 
-Documentation http://alexeypetrushin.github.com/synchronize
+Documentation [http://alexeypetrushin.github.com/synchronize](http://alexeypetrushin.github.com/synchronize)
 
 Installation `npm install synchronize`
 

@@ -3,7 +3,7 @@ var fs   = require('fs')
 
 sync.fiber(function(){
   var i, paths, path, stat, data
-  paths = sync(fs, 'readdir')('.')  
+  paths = sync(fs, 'readdir')('.')
   for(i = 0; i < paths.length; i++){
     path = paths[i]
     stat = sync(fs, 'stat')(path)

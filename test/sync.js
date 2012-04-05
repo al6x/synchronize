@@ -30,5 +30,25 @@ describe('sync', function(){
     sync.fiber(function(){
       expect(sync(obj, 'fn')('a', 'b')).to.be('ok')
     }, done)
+  }),
+
+  it("should catch asynchronous errors", function(done){
+    var obj = {
+      name : 'obj',
+      fn   : function(callback){
+        setTimeout(function(){
+          callback(new Error('an error'))
+        }, 10)
+      }
+    }
+    sync.fiber(function(){
+      var err
+      try {
+        sync(obj, 'fn')()
+      } catch (e) {
+        err = e
+      }
+      expect(err.message).to.be('an error')
+    }, done)
   })
 })

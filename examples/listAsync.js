@@ -14,7 +14,7 @@ var printFile = function(paths, i){
     } else {
       printFile(paths, i + 1)
     }
-  })      
+  })
 }
 
 fs.readdir('.', function(err, paths){
