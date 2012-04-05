@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <title>synchronize.js</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta name='description' content=''>
+    <meta name='author' content=''>
+
+    <!-- Styles -->
+    <link href='assets/bootstrap/css/bootstrap.css' rel='stylesheet'>
+    <link href='assets/google-code-prettify/prettify.css' rel='stylesheet'>
+    <link href='assets/style.css' rel='stylesheet'>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src='http://html5shim.googlecode.com/svn/trunk/html5.js'></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- <div class='navbar navbar-fixed-top'>
+      <div class='navbar-inner'>
+        <div class='container'>
+          <a class='brand' href='#'>Synchronize.js</a>
+          <ul class='nav'>
+            <li class='active'><a href='#'>Home</a></li>
+            <li><a href='#about'>About</a></li>
+            <li><a href='#contact'>Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </div> -->
+
+    <div class='container'>
+      
+<!-- <pre class='prettyprint'>
+a = function(){
+  console.log('hi')
+}
+</pre> -->
+      
+      <div class='row'>
+        <div class='offset1 span10'>
+          
+          <!-- Overview -->
+          <div class='page-header'>
+            <h1>
+              Synchronize.js
+              <small>write asynchronous code as if it's synchronous</small>
+            </h1>            
+          </div>
+          <p>
+            Use <code>sync(fn)</code> or <code>sync(obj, fname)</code> to turn 
+            asynchronous function into a new one, that can be used as if it's synchronous.
+            Result of callback will be returned as return value, in case of error it 
+            will be thrown, so You can use try/catch to catch it.
+          </p>
+          <p>
+            It can be used and mixed with other synchronous or asynchronous code, so You 
+            can introduce it to Your project gradually, by small steps.
+          </p>
+          <p>            
+            The project hosted on 
+            <a href='http://github.com/alexeypetrushin/synchronize'>GitHub</a>
+            You can report bugs and discuss features on the 
+            <a href='http://github.com/alexeypetrushin/synchronize/issues'>Issues</a> page
+            and install it with <code>npm install synchronize</code> command.
+          </p>
+          
+          <br/>
+          
+          <!-- Samples --> 
+          
+          <h2>Basic usage, printing content of file</h2>          
+          <br/>
+          <div class='row'>
+            <div class='span5'>
+<pre class='prettyprint'>
+var sync = require('synchronize')
+var fs   = require('fs')
+
+sync.fiber(function(){
+  var data = sync(fs, 'readFile')(__filename, 'utf8')
+  console.log(data)
+
+  try {
+    data = sync(fs, 'readFile')('invalid', 'utf8')
+  } catch (err) {
+    console.log(err)
+  }
+})
+</pre>
+            </div>
+            <div class='span5'>
+              <p>
+                In order to use synchronize we need to wrap execution into fiber.
+              </p>
+              <p>
+                Now we can use asynchronous methods as if it's synchronous and use
+                standard try/catch statement to catch asynchronous errors.
+              </p>
+            </div>                        
+          </div>
+                                       
+          <h2>Listing and printing files in directory</h2>
+          <br/>
+          <p>
+            Listing content of current directory, checking if path is file and printing its content 
+            to console.
+          </p>
+          <div class='row'>
+            <div class='span5'>
+              <p>Using synchronize</p>
+<pre class='prettyprint'>
+var sync = require('synchronize')
+var fs   = require('fs')
+
+sync.fiber(function(){
+  var i, paths, path, stat
+  paths = sync(fs, 'readdir')('.')  
+  for(i = 0; i < paths.length; i++){
+    path = paths[i]
+    stat = sync(fs, 'stat')(path)
+    if(!stat.isFile()) continue
+    data = sync(fs, 'readFile')(path, 'utf8')
+    console.log(data)
+  }
+})
+</pre>
+            </div>
+            <div class='span5'>
+              <p>The same code without synchronization</p>
+<pre class='prettyprint'>
+var fs   = require('fs')
+
+var printFile = function(paths, i){
+  if(i >= paths.length) return
+  var path = paths[i]
+  fs.stat(path, function(err, stat){
+    if(err) throw err
+    if(stat.isFile()){
+      fs.readFile(path, 'utf8', function(err, data){
+        if(err) throw err
+        console.log(data)
+        printFile(paths, i + 1)
+      })
+    } else {
+      printFile(paths, i + 1)
+    }
+  })      
+}
+
+fs.readdir('.', function(err, paths){
+  if(err) throw err
+  printFile(paths, 0)
+})
+</pre>
+            </div>
+          </div>
+                    
+          <h2>Usage with Express.js</h2>
+          <br/>
+          <div class='row'>
+            <div class='span5'>
+<pre class='prettyprint'>
+var sync    = require('synchronize')
+var fs      = require('fs')
+var express = require('express')
+
+var app = express.createServer()
+app.use(function(req, res, next){
+  sync.fiber(next)
+})
+
+app.get('/', function(req, res){
+  var data = sync(fs, 'readFile')(__filename, 'utf8')
+  res.send(data, {'Content-Type': 'text/plain'})
+})
+
+app.listen(3000)
+</pre>
+            </div>
+            <div class='span5'>
+              <p>Synchronized code can be mixed with asynchronous code in any combination.</p>
+              <p>
+                Here are one of possible way to use it with Express.js.</p>
+            </div>
+          </div>
+          
+          <h2>Usage with Mocha.js</h2>
+          <br/>
+          <div class='row'>
+            <div class='span5'>
+<pre class='prettyprint'>
+var sync   = require('synchronize')
+var fs     = require('fs')
+
+global.itSync = function(desc, callback){
+  it(desc, function(done){
+    sync.fiber(callback.bind(this), done)
+  })    
+}
+
+describe('File System', function(){
+  itSync('should read file', function(){
+    sync(fs, 'readFile')(__filename, 'utf8')
+  })
+})
+</pre>
+            </div>
+            <div class='span5'>
+              <p>
+                You can define <code>itSync</code> helper and use it to define synchronous
+                specs.
+              </p>
+            </div>
+          </div>
+          
+          <hr/>
+
+          <p>Copyright <a href='http://apetrush.in'>Alexey Petrushin</a>, released under MIT License</p>
+        </div>                
+      </div>
+
+    </div><!-- /container -->
+    
+    <a href='http://github.com/alexeypetrushin/synchronize'><img style='position: absolute; top: 0; right: 0; border: 0; z-index: 2080;'  src='https://a248.e.akamai.net/assets.github.com/img/71eeaab9d563c2b3c590319b398dd35683265e85/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67' alt='Fork me on GitHub'></a>
+
+    <!-- Scripts -->
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js'></script>    
+    <script src='assets/bootstrap/js/bootstrap.js'></script>
+    <script src='assets/google-code-prettify/prettify.js'></script>
+    <script>
+      $(prettyPrint)
+    </script>
+  </body>
+</html>

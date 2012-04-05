@@ -1,0 +1,20 @@
+{
+  "name"         : "synchronize",
+  "main"         : "./synchronize",
+  "version"      : "0.1.0",
+  "homepage"     : "http://alexeypetrushin.github.com/synchronize",
+  "dependencies" : {
+    "fibers" : "0.6.x"
+  },
+  "devDependencies": {
+    "mocha"         : "1.0.x",
+    "expect.js"     : "0.1.x"
+  },
+  "description"  : "Turns asynchronous function into synchronous",
+  "keywords"     : ["Fibers", "Sync", "Async", "Control Flow"],
+  "author"       : {
+    "name" : "Alexey Petrushin",
+    "url"  : "http://petrush.in"
+  },
+  "license"      : "MIT"
+}
