@@ -22,12 +22,12 @@ var sync = module.exports = function(first, second){
     fn      = first
   }
 
-  // Ensuring it runs within Fiber.
-  var fiber = Fiber.current
-  if(!fiber) throw new Error("can't synchronize code not enclosed with fiber!")
-
   // Returning synchronized wrapper.
   return function(){
+    // Ensuring it runs within Fiber.
+    var fiber = Fiber.current
+    if(!fiber) throw new Error("can't synchronize code not enclosed with fiber!")
+
     // Callback waiting for result or error.
     var callback = function(){
       fiber.run(arguments)
