@@ -10,13 +10,13 @@ describe('sync', function(){
         callback(null, 'ok')
       }, 10)
     }
+    var syncFn = sync(fn)
     sync.fiber(function(){
-      var obj = {name: 'obj'}
-      expect(sync(fn).call(obj, 'a', 'b')).to.be('ok')
+      expect(syncFn('a', 'b')).to.be('ok')
     }, done)
   }),
 
-  it("should execute within context", function(done){
+  it("should synchronize object functions", function(done){
     var obj = {
       name : 'obj',
       fn   : function(a, b, callback){
@@ -27,8 +27,10 @@ describe('sync', function(){
         }, 10)
       }
     }
+    var syncObj = sync(obj, 'fn')
+    expect(syncObj.__proto__).to.be(obj)
     sync.fiber(function(){
-      expect(sync(obj, 'fn')('a', 'b')).to.be('ok')
+      expect(syncObj.fn('a', 'b')).to.be('ok')
     }, done)
   }),
 
@@ -41,10 +43,11 @@ describe('sync', function(){
         }, 10)
       }
     }
+    var syncObj = sync(obj, 'fn')
     sync.fiber(function(){
       var err
       try {
-        sync(obj, 'fn')()
+        syncObj.fn()
       } catch (e) {
         err = e
       }

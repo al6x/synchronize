@@ -52,15 +52,18 @@ a = function(){
             </h1>
           </div>
           <p>
-            Use <code>sync(fn)</code> or <code>sync(obj, fname)</code> to turn
-            asynchronous function into a new one, that can be used as if it's synchronous.
-            Result of callback will be returned as return value, in case of error it
-            will be thrown, so You can use try/catch to catch it.
+            Use <code>sync(fn)</code> to turn asynchronous function into a new one, that can be
+            used as if it's synchronous. Result of callback will be returned as return value,
+            in case of error it will be thrown, so You can use try/catch to catch it.
           </p>
+          <p>
+            You can also use <code>sync(obj, fname)</code> it does the same but additionally also
+            binds returned function to object.
           <p>
             It can be used and mixed with other synchronous or asynchronous code, so You
             can introduce it to Your project gradually, by small steps.
           </p>
+
           <p>
             The project hosted on
             <a href='http://github.com/alexeypetrushin/synchronize'>GitHub</a>
@@ -75,6 +78,7 @@ a = function(){
 
           <h2>Basic usage, printing content of file</h2>
           <br/>
+
           <div class='row'>
             <div class='span5'>
 <pre class='prettyprint'>

@@ -1,5 +1,26 @@
 require('fibers')
 
+// Takes functino and returns its synchronized version.
+var synchronizeFunction = function(fn){
+  return function(){
+    // Ensuring it runs within Fiber.
+    var fiber = Fiber.current
+    if(!fiber) throw new Error("can't synchronize code not enclosed with fiber!")
+
+    // Calling.
+    Array.prototype.push.call(arguments, function(){
+      // Resuming fiber when callback finishes.
+      fiber.run(arguments)
+    })
+    fn.apply(this, arguments)
+
+    // Pausing fiber and waiting for result from callback.
+    var args = yield()
+    if(args[0]) throw args[0]
+    return args[1]
+  }
+}
+
 // Turns asynchronous function into another pseudo-synchronous function.
 // When You call it it will sort of `wait` and return callback result as
 // if it's usual `return` statement.
@@ -17,34 +38,10 @@ var sync = module.exports = function(first, second){
     context = first
     fn      = first[second]
     if(!fn) throw new Error("object " + first + " has no function " + second + "!")
+    return synchronizeFunction(fn).bind(context)
   } else {
-    context = null
-    fn      = first
-  }
-
-  // Returning synchronized wrapper.
-  return function(){
-    // Ensuring it runs within Fiber.
-    var fiber = Fiber.current
-    if(!fiber) throw new Error("can't synchronize code not enclosed with fiber!")
-
-    // Callback waiting for result or error.
-    var callback = function(){
-      fiber.run(arguments)
-    }
-
-    // Calling.
-    Array.prototype.push.call(arguments, callback)
-    if(context){
-      fn.apply(context, arguments)
-    } else {
-      fn.apply(this, arguments)
-    }
-
-    // Sort-of "waiting" for result from callback.
-    var args = yield()
-    if(args[0]) throw args[0]
-    return args[1]
+    fn = first
+    return synchronizeFunction(fn)
   }
 }
 
