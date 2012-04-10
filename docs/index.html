@@ -74,6 +74,35 @@ a = function(){
 
           <br/>
 
+          <!-- How to use -->
+          <h2>Usage patterns</h2>
+          <br/>
+          <div class='row'>
+            <div class='span5'>
+<pre class='prettyprint'>
+sync(fs.readFile).call(fs, 'file.txt')
+
+sync(fs, 'readFile')('file.txt')
+
+fs.readFile_ = sync(fs.readFile)
+fs.readFile_('file.txt')
+</pre>
+            </div>
+            <div class='span5'>
+              <p>
+                Synchronizing function without preserving its context, and supplying it explicitly
+                later.
+              </p>
+              <p>
+                A shortcut for the previous version, synchronizing function and binding it to object.
+              </p>
+              <p>
+                Adding synchronized version of function to object with '_' postfix (You may choose
+                any other naming convention).
+              </p>
+            </div>
+          </div>
+
           <!-- Samples -->
 
           <h2>Basic usage, printing content of file</h2>
@@ -84,13 +113,14 @@ a = function(){
 <pre class='prettyprint'>
 var sync = require('synchronize')
 var fs   = require('fs')
+fs.readFile_ = sync(fs.readFile)
 
 sync.fiber(function(){
-  var data = sync(fs, 'readFile')(__filename, 'utf8')
+  var data = fs.readFile_(__filename, 'utf8')
   console.log(data)
 
   try {
-    data = sync(fs, 'readFile')('invalid', 'utf8')
+    data = fs.readFile_('invalid', 'utf8')
   } catch (err) {
     console.log(err)
   }
@@ -121,14 +151,18 @@ sync.fiber(function(){
 var sync = require('synchronize')
 var fs   = require('fs')
 
+fs.readdir_  = sync(fs.readdir)
+fs.stat_     = sync(fs.stat)
+fs.readFile_ = sync(fs.readFile)
+
 sync.fiber(function(){
-  var i, paths, path, stat
-  paths = sync(fs, 'readdir')('.')
+  var i, paths, path, stat, data
+  paths = fs.readdir_('.')
   for(i = 0; i < paths.length; i++){
     path = paths[i]
-    stat = sync(fs, 'stat')(path)
+    stat = fs.stat_(path)
     if(!stat.isFile()) continue
-    data = sync(fs, 'readFile')(path, 'utf8')
+    data = fs.readFile_(path, 'utf8')
     console.log(data)
   }
 })
@@ -173,13 +207,15 @@ var sync    = require('synchronize')
 var fs      = require('fs')
 var express = require('express')
 
+fs.readFile_ = sync(fs.readFile)
+
 var app = express.createServer()
 app.use(function(req, res, next){
   sync.fiber(next)
 })
 
 app.get('/', function(req, res){
-  var data = sync(fs, 'readFile')(__filename, 'utf8')
+  var data = fs.readFile_(__filename, 'utf8')
   res.send(data, {'Content-Type': 'text/plain'})
 })
 
@@ -201,22 +237,24 @@ app.listen(3000)
 var sync   = require('synchronize')
 var fs     = require('fs')
 
-global.itSync = function(desc, callback){
+fs.readFile_ = sync(fs.readFile)
+
+global.it_ = function(desc, callback){
   it(desc, function(done){
     sync.fiber(callback.bind(this), done)
   })
 }
 
 describe('File System', function(){
-  itSync('should read file', function(){
-    sync(fs, 'readFile')(__filename, 'utf8')
+  it_('should read file', function(){
+    fs.readFile_(__filename, 'utf8')
   })
 })
 </pre>
             </div>
             <div class='span5'>
               <p>
-                You can define <code>itSync</code> helper and use it to define synchronous
+                You can define <code>it_</code> helper and use it to define synchronous
                 specs.
               </p>
             </div>

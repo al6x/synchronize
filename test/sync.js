@@ -27,10 +27,8 @@ describe('sync', function(){
         }, 10)
       }
     }
-    var syncObj = sync(obj, 'fn')
-    expect(syncObj.__proto__).to.be(obj)
     sync.fiber(function(){
-      expect(syncObj.fn('a', 'b')).to.be('ok')
+      expect(sync(obj, 'fn')('a', 'b')).to.be('ok')
     }, done)
   }),
 
@@ -43,11 +41,40 @@ describe('sync', function(){
         }, 10)
       }
     }
-    var syncObj = sync(obj, 'fn')
     sync.fiber(function(){
       var err
       try {
-        syncObj.fn()
+        sync(obj, 'fn')()
+      } catch (e) {
+        err = e
+      }
+      expect(err.message).to.be('an error')
+    }, done)
+  }),
+
+  it("should be compatible with not asynchronous callbacks", function(done){
+    var obj = {
+      name : 'obj',
+      fn   : function(callback){
+        callback(null, 'ok')
+      }
+    }
+    sync.fiber(function(){
+      expect(sync(obj, 'fn')()).to.be('ok')
+    }, done)
+  }),
+
+  it("should catch non asynchronous errors", function(done){
+    var obj = {
+      name : 'obj',
+      fn   : function(callback){
+        callback(new Error('an error'))
+      }
+    }
+    sync.fiber(function(){
+      var err
+      try {
+        sync(obj, 'fn')()
       } catch (e) {
         err = e
       }

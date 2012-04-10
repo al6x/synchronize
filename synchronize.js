@@ -9,8 +9,12 @@ var synchronizeFunction = function(fn){
 
     // Calling.
     Array.prototype.push.call(arguments, function(){
-      // Resuming fiber when callback finishes.
-      fiber.run(arguments)
+      var thatArguments = arguments
+      // Wrapping in nextTick as a safe measure against not asynchronous callbacks.
+      process.nextTick(function(){
+        // Resuming fiber when callback finishes.
+        fiber.run(thatArguments)
+      })
     })
     fn.apply(this, arguments)
 
