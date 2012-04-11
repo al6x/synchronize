@@ -55,11 +55,16 @@ var sync = module.exports = function(first, second){
 sync.fiber = function(callback, done){
   var that = this
   Fiber(function(){
-    try {
+    if (done) {
+      try {
+        callback.call(that)
+        done()
+      } catch (error){
+        done(error)
+      }
+    } else {
+      // Don't catch errors if done not provided!
       callback.call(that)
-      if(typeof done === "function") done()
-    } catch (error){
-      if(typeof done === "function") done(error)
     }
   }).run()
 }
