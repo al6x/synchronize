@@ -52,20 +52,24 @@ a = function(){
             </h1>
           </div>
           <p>
-            Use <code>sync(fn)</code> to turn asynchronous function into a synchronous.
+            Use <code>await</code> and <code>defer</code> to execute asynchronous function
+            synchronously.
             Result of callback will be returned as return value, in case of error it will be
-            thrown, so You can use try/catch to catch it.
+            thrown and can be intercepted by try/catch statement.
           </p>
           <p>
-            Synchronized functions are <strong>backward compatible</strong> and can be used
-            as asynchronous and mixed with other synchronous or asynchronous code.
-            It allows You to use the same function in both ways and write compact and
-            clean code.
+            Or You can synchronize function <code>sync(fn)</code> and it will use await/defer
+            automatically.
+            It's <strong>backward compatible</strong> and can be called synchronously or
+            asynchronously if You provide callback.
+            You can mix it with other synchronous or asynchronous code.
+          </p>
+          <p>
+            Use await/defer manually to get more control or automatically to write compact and clean code.
           </p>
 
           <p>
-            You can also use <code>sync(obj, fname1, fname2, ...)</code> to synchronize methods
-            of object.
+            Install it with <code>npm install synchronize</code> command.
           </p>
 
           <p>
@@ -73,7 +77,7 @@ a = function(){
             <a href='http://github.com/alexeypetrushin/synchronize'>GitHub</a>
             You can report bugs and discuss features on the
             <a href='http://github.com/alexeypetrushin/synchronize/issues'>Issues</a> page
-            and install it with <code>npm install synchronize</code> command.
+
           </p>
 
           <br/>
