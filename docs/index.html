@@ -23,7 +23,7 @@
     <!-- <div class='navbar navbar-fixed-top'>
       <div class='navbar-inner'>
         <div class='container'>
-          <a class='brand' href='#'>Synchronize.js</a>
+          <a class='brand' href='#'>synchronize.js</a>
           <ul class='nav'>
             <li class='active'><a href='#'>Home</a></li>
             <li><a href='#about'>About</a></li>
@@ -47,22 +47,25 @@ a = function(){
           <!-- Overview -->
           <div class='page-header'>
             <h1>
-              Synchronize.js
+              synchronize.js
               <small>write asynchronous code as if it's synchronous</small>
             </h1>
           </div>
-
           <p>
-            Use <code>sync(fn)</code> to turn asynchronous function into a new one, that can be
-            used as if it's synchronous. Result of callback will be returned as return value,
-            in case of error it will be thrown, so You can use try/catch to catch it.
+            Use <code>sync(fn)</code> to turn asynchronous function into a synchronous.
+            Result of callback will be returned as return value, in case of error it will be
+            thrown, so You can use try/catch to catch it.
           </p>
           <p>
-            You can also use <code>sync(obj, fname)</code> it does the same but additionally also
-            binds returned function to object.
+            Synchronized functions are <strong>backward compatible</strong> and can be used
+            as asynchronous and mixed with other synchronous or asynchronous code.
+            It allows You to use the same function in both ways and write compact and
+            clean code.
+          </p>
+
           <p>
-            It can be used and mixed with other synchronous or asynchronous code, so You
-            can introduce it to Your project gradually, by small steps.
+            You can also use <code>sync(obj, fname1, fname2, ...)</code> to synchronize methods
+            of object.
           </p>
 
           <p>
@@ -81,28 +84,36 @@ a = function(){
           <div class='row'>
             <div class='span5'>
 <pre class='prettyprint'>
-sync(fs.readFile).call(fs, 'file.txt')
-
-sync(fs, 'readFile')('file.txt')
-
-fs.readFile_ = sync(fs.readFile)
-fs.readFile_('file.txt')
+data = sync.await(fs.readFile(fname, sync.defer()))
 </pre>
             </div>
             <div class='span5'>
               <p>
-                Synchronizing function without preserving its context, and supplying it explicitly
-                later.
-              </p>
-              <p>
-                A shortcut for the previous version, synchronizing function and binding it to object.
-              </p>
-              <p>
-                Adding synchronized version of function to object with '_' postfix (You may choose
-                any other naming convention).
+                Use <code>await</code> and <code>defer</code> keywords by hands
+                to call function synchronously (you can make await and defer global
+                to make things shorter).
               </p>
             </div>
           </div>
+          <div class='row'>
+            <div class='span5'>
+<pre class='prettyprint'>
+sync(fs, 'readFile')
+
+var data = fs.readFile(fname)
+fs.readFile(fname, function(err, data)){}
+</pre>
+            </div>
+            <div class='span5'>
+              <p>
+                Synchronize function, after it You can use it in both ways -
+                synchronous or asynchronous.
+                Basically it uses the same await/defer but automatically.
+              </p>
+            </div>
+          </div>
+
+
 
           <!-- Samples -->
 
@@ -114,27 +125,38 @@ fs.readFile_('file.txt')
 <pre class='prettyprint'>
 var sync = require('synchronize')
 var fs   = require('fs')
-fs.readFile_ = sync(fs.readFile)
+
+sync(fs, 'readFile')
 
 sync.fiber(function(){
-  var data = fs.readFile_(__filename, 'utf8')
+  var data = fs.readFile(__filename, 'utf8')
   console.log(data)
 
   try {
-    data = fs.readFile_('invalid', 'utf8')
+    data = fs.readFile('invalid', 'utf8')
   } catch (err) {
     console.log(err)
   }
+
+  fs.readFile(__filename, 'utf8', function(err, data){
+    console.log(data)
+  })
 })
 </pre>
             </div>
             <div class='span5'>
               <p>
-                In order to use synchronize we need to wrap execution into fiber.
+                In order to use synchronized functions and pause execution without blocking Node.js we
+                need to wrap execution into <code>Fiber</code>.
               </p>
               <p>
-                Now we can use asynchronous methods as if it's synchronous and use
-                standard try/catch statement to catch asynchronous errors.
+                Inside of Fiber we can use <code>yield</code> and call asynchronous functions as if it's synchronous.
+              </p>
+              <p>
+                We can also use standard try/catch statement to catch asynchronous errors.
+              </p>
+              <p>
+                Or call readFile asynchronously if we wish so.
               </p>
             </div>
           </div>
@@ -152,18 +174,16 @@ sync.fiber(function(){
 var sync = require('synchronize')
 var fs   = require('fs')
 
-fs.readdir_  = sync(fs.readdir)
-fs.stat_     = sync(fs.stat)
-fs.readFile_ = sync(fs.readFile)
+sync(fs, 'readdir', 'stat', 'readFile')
 
 sync.fiber(function(){
   var i, paths, path, stat, data
-  paths = fs.readdir_('.')
+  paths = fs.readdir('.')
   for(i = 0; i < paths.length; i++){
     path = paths[i]
-    stat = fs.stat_(path)
+    stat = fs.stat(path)
     if(!stat.isFile()) continue
-    data = fs.readFile_(path, 'utf8')
+    data = fs.readFile(path, 'utf8')
     console.log(data)
   }
 })
@@ -172,7 +192,7 @@ sync.fiber(function(){
             <div class='span5'>
               <p>The same code without synchronization</p>
 <pre class='prettyprint'>
-var fs   = require('fs')
+var fs = require('fs')
 
 var printFile = function(paths, i){
   if(i >= paths.length) return
@@ -208,7 +228,7 @@ var sync    = require('synchronize')
 var fs      = require('fs')
 var express = require('express')
 
-fs.readFile_ = sync(fs.readFile)
+sync(fs, 'readFile')
 
 var app = express.createServer()
 app.use(function(req, res, next){
@@ -216,7 +236,7 @@ app.use(function(req, res, next){
 })
 
 app.get('/', function(req, res){
-  var data = fs.readFile_(__filename, 'utf8')
+  var data = fs.readFile(__filename, 'utf8')
   res.send(data, {'Content-Type': 'text/plain'})
 })
 
@@ -235,27 +255,27 @@ app.listen(3000)
           <div class='row'>
             <div class='span5'>
 <pre class='prettyprint'>
-var sync   = require('synchronize')
-var fs     = require('fs')
+var sync = require('synchronize')
+var fs   = require('fs')
 
-fs.readFile_ = sync(fs.readFile)
+sync(fs, 'readFile')
 
-global.it_ = function(desc, callback){
+sync.it = function(desc, callback){
   it(desc, function(done){
     sync.fiber(callback.bind(this), done)
   })
 }
 
 describe('File System', function(){
-  it_('should read file', function(){
-    fs.readFile_(__filename, 'utf8')
+  sync.it('should read file', function(){
+    var data = fs.readFile(__filename, 'utf8')
   })
 })
 </pre>
             </div>
             <div class='span5'>
               <p>
-                You can define <code>it_</code> helper and use it to define synchronous
+                You can define <code>flow.it</code> helper and use it to define synchronous
                 specs.
               </p>
 
@@ -267,6 +287,24 @@ describe('File System', function(){
               </p>
             </div>
           </div>
+
+
+          <!-- ES6 & Generators -->
+          <h2>ES6 Generators compatibility</h2>
+          <br/>
+          <p>
+            Fibers are superset of ES6 Generators, so it's possible to design API in
+            the same way as as if Generators would be already available.
+          </p>
+          <p>
+            I try to keep API as close to ES6 Generators specification as possible.
+            When generators will be finally available in V8 &amp; Node.js (in about 1-2 years) the
+            API will be almost the same.
+          </p>
+          <p>
+            I believe the only thing that would needs to be changed is - to remove brackets and change
+            <code>yield(fn)</code> to <code>yield fn</code>.
+          </p>
 
           <hr/>
 

@@ -1,50 +1,54 @@
-var sync   = require('../synchronize')
+var sync   = require('../sync')
 var expect = require('expect.js')
 
-describe('sync', function(){
-  it('should synchronize function', function(done){
-    var fn = function(a, b, callback){
-      expect(a).to.be('a')
-      expect(b).to.be('b')
-      setTimeout(function(){
-        callback(null, 'ok')
-      }, 10)
-    }
-    var syncFn = sync(fn)
+describe('Control Flow', function(){
+  var fn = function(arg, callback){
+    expect(arg).to.be('something')
+    process.nextTick(function(){
+      callback(null, 'ok')
+    })
+  }
+
+  it('should provide await & defer', function(done){
     sync.fiber(function(){
-      expect(syncFn('a', 'b')).to.be('ok')
+      var result = sync.await(fn('something', sync.defer()))
+      expect(result).to.be('ok')
     }, done)
   }),
 
-  it("should synchronize object functions", function(done){
-    var obj = {
-      name : 'obj',
-      fn   : function(a, b, callback){
-        expect(a).to.be('a')
-        expect(b).to.be('b')
-        setTimeout(function(){
-          callback(null, 'ok')
-        }, 10)
-      }
-    }
+  it('should synchronize function', function(done){
+    fn = sync(fn)
     sync.fiber(function(){
-      expect(sync(obj, 'fn')('a', 'b')).to.be('ok')
+      expect(fn('something')).to.be('ok')
     }, done)
+  })
+
+  it('should be save aginst synchronizing function twice', function(done){
+    fn = sync(sync(fn))
+    sync.fiber(function(){
+      expect(fn('something')).to.be('ok')
+    }, done)
+  }),
+
+  it('should allow call synchronized function explicitly', function(done){
+    fn = sync(fn)
+    fn('something', function(err, result){
+      expect(result).to.be('ok')
+      done(err)
+    })
   }),
 
   it("should catch asynchronous errors", function(done){
-    var obj = {
-      name : 'obj',
-      fn   : function(callback){
-        setTimeout(function(){
-          callback(new Error('an error'))
-        }, 10)
-      }
+    var fn = function(callback){
+      process.nextTick(function(){
+        callback(new Error('an error'))
+      })
     }
+    fn = sync(fn)
     sync.fiber(function(){
       var err
       try {
-        sync(obj, 'fn')()
+        fn()
       } catch (e) {
         err = e
       }
@@ -53,28 +57,24 @@ describe('sync', function(){
   }),
 
   it("should be compatible with not asynchronous callbacks", function(done){
-    var obj = {
-      name : 'obj',
-      fn   : function(callback){
-        callback(null, 'ok')
-      }
+    fn = function(callback){
+      callback(null, 'ok')
     }
+    fn = sync(fn)
     sync.fiber(function(){
-      expect(sync(obj, 'fn')()).to.be('ok')
+      expect(fn()).to.be('ok')
     }, done)
   }),
 
   it("should catch non asynchronous errors", function(done){
-    var obj = {
-      name : 'obj',
-      fn   : function(callback){
-        callback(new Error('an error'))
-      }
+    fn = function(callback){
+      callback(new Error('an error'))
     }
+    fn = sync(fn)
     sync.fiber(function(){
       var err
       try {
-        sync(obj, 'fn')()
+        fn()
       } catch (e) {
         err = e
       }

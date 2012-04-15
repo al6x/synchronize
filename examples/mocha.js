@@ -1,16 +1,16 @@
-var sync   = require('synchronize')
-var fs     = require('fs')
+var sync = require('synchronize')
+var fs   = require('fs')
 
-fs.readFile_ = sync(fs.readFile)
+sync(fs, 'readFile')
 
-global.it_ = function(desc, callback){
+sync.it = function(desc, callback){
   it(desc, function(done){
     sync.fiber(callback.bind(this), done)
   })
 }
 
 describe('File System', function(){
-  it_('should read file', function(){
-    fs.readFile_(__filename, 'utf8')
+  sync.it('should read file', function(){
+    var data = fs.readFile(__filename, 'utf8')
   })
 })
