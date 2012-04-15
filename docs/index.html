@@ -154,7 +154,7 @@ sync.fiber(function(){
                 need to wrap execution into <code>Fiber</code>.
               </p>
               <p>
-                Inside of Fiber we can use <code>yield</code> and call asynchronous functions as if it's synchronous.
+                Inside of Fiber we can call asynchronous functions as if it's synchronous.
               </p>
               <p>
                 We can also use standard try/catch statement to catch asynchronous errors.
@@ -279,7 +279,7 @@ describe('File System', function(){
             </div>
             <div class='span5'>
               <p>
-                You can define <code>flow.it</code> helper and use it to define synchronous
+                You can define <code>sync.it</code> helper and use it to define synchronous
                 specs.
               </p>
 
@@ -291,24 +291,6 @@ describe('File System', function(){
               </p>
             </div>
           </div>
-
-
-          <!-- ES6 & Generators -->
-          <h2>ES6 Generators compatibility</h2>
-          <br/>
-          <p>
-            Fibers are superset of ES6 Generators, so it's possible to design API in
-            the same way as as if Generators would be already available.
-          </p>
-          <p>
-            I try to keep API as close to ES6 Generators specification as possible.
-            When generators will be finally available in V8 &amp; Node.js (in about 1-2 years) the
-            API will be almost the same.
-          </p>
-          <p>
-            I believe the only thing that would needs to be changed is - to remove brackets and change
-            <code>yield(fn)</code> to <code>yield fn</code>.
-          </p>
 
           <hr/>
 
