@@ -2,3 +2,12 @@ body {
   padding-top: 40px;
   padding-bottom: 40px;
 }
+
+pre.prettyprint {
+  margin-bottom: 0px;
+}
+
+h2 {
+  margin-top: 0.7em;
+  margin-bottom: 0.7em;
+}

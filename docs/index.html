@@ -62,7 +62,7 @@ a = function(){
             automatically.
             It's <strong>backward compatible</strong> and can be called synchronously or
             asynchronously if You provide callback.
-            You can mix it with other synchronous or asynchronous code.
+            You can also mix it with other synchronous or asynchronous code.
           </p>
           <p>
             Use await/defer manually to get more control or automatically to write compact and clean code.
@@ -77,14 +77,10 @@ a = function(){
             <a href='http://github.com/alexeypetrushin/synchronize'>GitHub</a>
             You can report bugs and discuss features on the
             <a href='http://github.com/alexeypetrushin/synchronize/issues'>Issues</a> page
-
           </p>
-
-          <br/>
 
           <!-- How to use -->
           <h2>Usage patterns</h2>
-          <br/>
           <div class='row'>
             <div class='span5'>
 <pre class='prettyprint'>
@@ -117,12 +113,9 @@ fs.readFile(fname, function(err, data)){}
             </div>
           </div>
 
-
-
           <!-- Samples -->
 
           <h2>Basic usage, printing content of file</h2>
-          <br/>
 
           <div class='row'>
             <div class='span5'>
@@ -166,7 +159,6 @@ sync.fiber(function(){
           </div>
 
           <h2>Listing and printing files in directory</h2>
-          <br/>
           <p>
             Listing content of current directory, checking if path is file and printing its content
             to console.
@@ -224,7 +216,6 @@ fs.readdir('.', function(err, paths){
           </div>
 
           <h2>Usage with Express.js</h2>
-          <br/>
           <div class='row'>
             <div class='span5'>
 <pre class='prettyprint'>
@@ -255,7 +246,6 @@ app.listen(3000)
           </div>
 
           <h2>Usage with Mocha.js</h2>
-          <br/>
           <div class='row'>
             <div class='span5'>
 <pre class='prettyprint'>

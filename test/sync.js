@@ -80,5 +80,19 @@ describe('Control Flow', function(){
       }
       expect(err.message).to.be('an error')
     }, done)
+  }),
+
+  describe("Special cases", function(){
+    it('should be able to emulate sleep', function(done){
+      var sleep = function(ms){
+        sync.await(setTimeout(sync.defer(), ms))
+      }
+
+      sync.fiber(function(){
+        var start = new Date().getTime()
+        sleep(50)
+        expect(new Date().getTime()).to.be.greaterThan(start)
+      }, done)
+    })
   })
 })
