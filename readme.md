@@ -4,6 +4,4 @@ Documentation [http://alexeypetrushin.github.com/synchronize](http://alexeypetru
 
 Installation `npm install synchronize`
 
-TODO: sequence, parallel, first, join, http://taskjs.org
-
 Copyright (c) Alexey Petrushin, http://petrush.in, released under the MIT license.
