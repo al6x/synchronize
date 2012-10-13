@@ -14,7 +14,7 @@ describe('Control Flow', function(){
       var result = sync.await(fn('something', sync.defer()))
       expect(result).to.eql('ok')
     }, done)
-  }),
+  })
 
   it('should synchronize function', function(done){
     fn = sync(fn)
@@ -28,7 +28,7 @@ describe('Control Flow', function(){
     sync.fiber(function(){
       expect(fn('something')).to.eql('ok')
     }, done)
-  }),
+  })
 
   it('should allow call synchronized function explicitly', function(done){
     fn = sync(fn)
@@ -36,7 +36,7 @@ describe('Control Flow', function(){
       expect(result).to.eql('ok')
       done(err)
     })
-  }),
+  })
 
   it("should catch asynchronous errors", function(done){
     var fn = function(cb){
@@ -54,7 +54,7 @@ describe('Control Flow', function(){
       }
       expect(err.message).to.eql('an error')
     }, done)
-  }),
+  })
 
   it("should be compatible with not asynchronous cbs", function(done){
     fn = function(cb){
@@ -64,7 +64,7 @@ describe('Control Flow', function(){
     sync.fiber(function(){
       expect(fn()).to.eql('ok')
     }, done)
-  }),
+  })
 
   it("should catch non asynchronous errors", function(done){
     fn = function(cb){
@@ -80,7 +80,7 @@ describe('Control Flow', function(){
       }
       expect(err.message).to.eql('an error')
     }, done)
-  }),
+  })
 
   describe("Special cases", function(){
     it('should be able to emulate sleep', function(done){
@@ -94,5 +94,34 @@ describe('Control Flow', function(){
         expect(new Date().getTime()).to.be.greaterThan(start)
       }, done)
     })
+  })
+
+  it('should support parallel calls', function(done){
+    sync.fiber(function(){
+      var calls = []
+      var readA = function(cb){
+        calls.push('readA')
+        process.nextTick(function(){
+          calls.push('nextTick')
+          cb(null, 'dataA')
+        })
+      }
+      var readB = function(cb){
+        calls.push('readB')
+        process.nextTick(function(){
+          calls.push('nextTick')
+          cb(null, 'dataB')
+        })
+      }
+
+      sync.parallel(function(){
+        readA(sync.defer())
+        readB(sync.defer())
+      })
+      var results = sync.await()
+
+      expect(results).to.eql(['dataA', 'dataB'])
+      expect(calls).to.eql(['readA', 'readB', 'nextTick', 'nextTick'])
+    }, done)
   })
 })
