@@ -2,10 +2,10 @@ var sync   = require('../sync')
 var expect = require('chai').expect
 
 describe('Control Flow', function(){
-  var fn = function(arg, callback){
+  var fn = function(arg, cb){
     expect(arg).to.eql('something')
     process.nextTick(function(){
-      callback(null, 'ok')
+      cb(null, 'ok')
     })
   }
 
@@ -39,9 +39,9 @@ describe('Control Flow', function(){
   }),
 
   it("should catch asynchronous errors", function(done){
-    var fn = function(callback){
+    var fn = function(cb){
       process.nextTick(function(){
-        callback(new Error('an error'))
+        cb(new Error('an error'))
       })
     }
     fn = sync(fn)
@@ -56,9 +56,9 @@ describe('Control Flow', function(){
     }, done)
   }),
 
-  it("should be compatible with not asynchronous callbacks", function(done){
-    fn = function(callback){
-      callback(null, 'ok')
+  it("should be compatible with not asynchronous cbs", function(done){
+    fn = function(cb){
+      cb(null, 'ok')
     }
     fn = sync(fn)
     sync.fiber(function(){
@@ -67,8 +67,8 @@ describe('Control Flow', function(){
   }),
 
   it("should catch non asynchronous errors", function(done){
-    fn = function(callback){
-      callback(new Error('an error'))
+    fn = function(cb){
+      cb(new Error('an error'))
     }
     fn = sync(fn)
     sync.fiber(function(){

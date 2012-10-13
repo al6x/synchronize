@@ -749,7 +749,7 @@
     backdrop.call(this)
   }
 
-  function backdrop( callback ) {
+  function backdrop( cb ) {
     var that = this
       , animate = this.$element.hasClass('fade') ? 'fade' : ''
 
@@ -768,8 +768,8 @@
       this.$backdrop.addClass('in')
 
       doAnimate ?
-        this.$backdrop.one($.support.transition.end, callback) :
-        callback()
+        this.$backdrop.one($.support.transition.end, cb) :
+        cb()
 
     } else if (!this.isShown && this.$backdrop) {
       this.$backdrop.removeClass('in')
@@ -778,8 +778,8 @@
         this.$backdrop.one($.support.transition.end, $.proxy(removeBackdrop, this)) :
         removeBackdrop.call(this)
 
-    } else if (callback) {
-      callback()
+    } else if (cb) {
+      cb()
     }
   }
 
@@ -1391,9 +1391,9 @@
       })
     }
 
-  , activate: function ( element, container, callback) {
+  , activate: function ( element, container, cb) {
       var $active = container.find('> .active')
-        , transition = callback
+        , transition = cb
             && $.support.transition
             && $active.hasClass('fade')
 
@@ -1416,7 +1416,7 @@
           element.closest('li.dropdown').addClass('active')
         }
 
-        callback && callback()
+        cb && cb()
       }
 
       transition ?

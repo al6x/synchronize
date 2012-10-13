@@ -54,14 +54,14 @@ a = function(){
           <p>
             Use <code>await</code> and <code>defer</code> to execute asynchronous function
             synchronously.
-            Result of callback will be returned as return value, in case of error it will be
+            Result of cb will be returned as return value, in case of error it will be
             thrown and can be intercepted by try/catch statement.
           </p>
           <p>
             Or You can synchronize function <code>sync(fn)</code> and it will use await/defer
             automatically.
             It's <strong>backward compatible</strong> and can be called synchronously or
-            asynchronously if You provide callback.
+            asynchronously if You provide cb.
             You can also mix it with other synchronous or asynchronous code.
           </p>
           <p>
@@ -254,9 +254,9 @@ var fs   = require('fs')
 
 sync(fs, 'readFile')
 
-sync.it = function(desc, callback){
+sync.it = function(desc, cb){
   it(desc, function(done){
-    sync.fiber(callback.bind(this), done)
+    sync.fiber(cb.bind(this), done)
   })
 }
 

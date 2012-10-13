@@ -6,7 +6,7 @@ require('fibers')
 // Or You can provide object and it will synchronize its functions `sync(obj, fname1, fname2, ...)`.
 //
 // New synchronized version of function is backward compatible and You may call it as usual with
-// explicit callback or inside of `fiber` with `aware` and `defer` keywords.
+// explicit cb or inside of `fiber` with `aware` and `defer` keywords.
 var sync = module.exports = function(){
   if(arguments.length > 1){
     // Synchronizing functions of object.
@@ -29,16 +29,16 @@ sync.syncFn = function(fn){
   if(fn._synchronized) return fn
 
   var syncFn = function(){
-    // Using fibers only if there's active fiber and callback not provided explicitly.
+    // Using fibers only if there's active fiber and cb not provided explicitly.
     if(Fiber.current && (typeof arguments[arguments.length-1] !== 'function')){
-      // Calling asynchronous function with our special fiber-aware callback.
+      // Calling asynchronous function with our special fiber-aware cb.
       Array.prototype.push.call(arguments, sync.defer())
       fn.apply(this, arguments)
 
       // Waiting for asynchronous result.
       return sync.await()
     }else{
-      // If there's no active fiber or callback provided explicitly we call original version.
+      // If there's no active fiber or cb provided explicitly we call original version.
       return fn.apply(this, arguments)
     }
   }
@@ -48,10 +48,10 @@ sync.syncFn = function(fn){
 
   return syncFn
 }
-// Use it to wait for asynchronous callback.
+// Use it to wait for asynchronous cb.
 sync.await = global.yield
 
-// Creates special, fiber-aware asynchronous callback resuming current fiber when it will be finished.
+// Creates special, fiber-aware asynchronous cb resuming current fiber when it will be finished.
 sync.defer = function(){
   var fiber = Fiber.current
   if(!fiber) throw "no current Fiber, defer can'b be used without Fiber!"
@@ -72,22 +72,22 @@ sync.defer = function(){
   }
 }
 
-// Executes `callback` within `Fiber`, when it finish it will call `done` callback.
+// Executes `cb` within `Fiber`, when it finish it will call `done` cb.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
 // if `done` not provided it will be just rethrown.
-sync.fiber = function(callback, done){
+sync.fiber = function(cb, done){
   var that = this
   Fiber(function(){
     if (done) {
       try {
-        callback.call(that)
+        cb.call(that)
         done()
       } catch (error){
         done(error)
       }
     } else {
       // Don't catch errors if done not provided!
-      callback.call(that)
+      cb.call(that)
     }
   }).run()
 }

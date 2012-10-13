@@ -3,9 +3,9 @@ var fs   = require('fs')
 
 sync(fs, 'readFile')
 
-sync.it = function(desc, callback){
+sync.it = function(desc, cb){
   it(desc, function(done){
-    sync.fiber(callback.bind(this), done)
+    sync.fiber(cb.bind(this), done)
   })
 }
 
