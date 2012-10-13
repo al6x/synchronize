@@ -1,9 +1,9 @@
 var sync   = require('../sync')
-var expect = require('expect.js')
+var expect = require('chai').expect
 
 describe('Control Flow', function(){
   var fn = function(arg, callback){
-    expect(arg).to.be('something')
+    expect(arg).to.eql('something')
     process.nextTick(function(){
       callback(null, 'ok')
     })
@@ -12,28 +12,28 @@ describe('Control Flow', function(){
   it('should provide await & defer', function(done){
     sync.fiber(function(){
       var result = sync.await(fn('something', sync.defer()))
-      expect(result).to.be('ok')
+      expect(result).to.eql('ok')
     }, done)
   }),
 
   it('should synchronize function', function(done){
     fn = sync(fn)
     sync.fiber(function(){
-      expect(fn('something')).to.be('ok')
+      expect(fn('something')).to.eql('ok')
     }, done)
   })
 
   it('should be save aginst synchronizing function twice', function(done){
     fn = sync(sync(fn))
     sync.fiber(function(){
-      expect(fn('something')).to.be('ok')
+      expect(fn('something')).to.eql('ok')
     }, done)
   }),
 
   it('should allow call synchronized function explicitly', function(done){
     fn = sync(fn)
     fn('something', function(err, result){
-      expect(result).to.be('ok')
+      expect(result).to.eql('ok')
       done(err)
     })
   }),
@@ -52,7 +52,7 @@ describe('Control Flow', function(){
       } catch (e) {
         err = e
       }
-      expect(err.message).to.be('an error')
+      expect(err.message).to.eql('an error')
     }, done)
   }),
 
@@ -62,7 +62,7 @@ describe('Control Flow', function(){
     }
     fn = sync(fn)
     sync.fiber(function(){
-      expect(fn()).to.be('ok')
+      expect(fn()).to.eql('ok')
     }, done)
   }),
 
@@ -78,7 +78,7 @@ describe('Control Flow', function(){
       } catch (e) {
         err = e
       }
-      expect(err.message).to.be('an error')
+      expect(err.message).to.eql('an error')
     }, done)
   }),
 
