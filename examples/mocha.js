@@ -1,16 +1,12 @@
-var sync = require('synchronize')
-var fs   = require('fs')
+var sync  = require('synchronize')
+var fs    = require('fs')
 
 sync(fs, 'readFile')
 
-sync.it = function(desc, cb){
-  it(desc, function(done){
-    sync.fiber(cb.bind(this), done)
-  })
-}
+var async = sync.asyncIt
 
-describe('File System', function(){
-  sync.it('should read file', function(){
+describe('File System', async(function(){
+  it('should read file', function(){
     var data = fs.readFile(__filename, 'utf8')
   })
-})
+}))

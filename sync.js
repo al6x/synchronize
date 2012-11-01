@@ -138,3 +138,14 @@ sync.fiber = function(cb, done){
     }
   }).run()
 }
+
+// Asynchronous wrapper for mocha.js tests.
+//
+//   async = sync.asyncIt
+//   it('should pass', async(function(){
+//     ...
+//   }))
+//
+sync.asyncIt = function(cb){
+  return function(done){sync.fiber(cb, done)}
+}
