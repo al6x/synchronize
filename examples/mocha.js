@@ -5,8 +5,8 @@ sync(fs, 'readFile')
 
 var async = sync.asyncIt
 
-describe('File System', async(function(){
-  it('should read file', function(){
+describe('File System', function(){
+  it('should read file', async(function(){
     var data = fs.readFile(__filename, 'utf8')
-  })
-}))
+  }))
+})

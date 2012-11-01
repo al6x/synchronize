@@ -256,17 +256,17 @@ sync(fs, 'readFile')
 
 var async = sync.asyncIt
 
-describe('File System', async(function(){
-  it('should read file', function(){
+describe('File System', function(){
+  it('should read file', async(function(){
     var data = fs.readFile(__filename, 'utf8')
-  })
-}))
+  }))
+})
 </pre>
             </div>
             <div class='span5'>
               <p>
-                You can define <code>sync.it</code> helper and use it to define synchronous
-                specs.
+                You can use <code>sync.asyncIt</code> helper to greatly simplify writing of
+                asynchronous tests.
               </p>
 
               <p>
