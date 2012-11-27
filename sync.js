@@ -147,5 +147,6 @@ sync.fiber = function(cb, done){
 //   }))
 //
 sync.asyncIt = function(cb){
-  return function(done){sync.fiber(cb, done)}
+  if(!cb) throw "no callback for async spec helper!"
+  return function(done){sync.fiber(cb.bind(this), done)}
 }
