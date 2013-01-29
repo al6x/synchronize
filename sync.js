@@ -1,4 +1,4 @@
-require('fibers')
+var Fiber = require('fibers')
 
 // Takes function and returns its synchronized version, it's still backward compatible and
 // can be used as asynchronous `syncFn = sync(asyncFn)`.
@@ -49,7 +49,7 @@ sync.syncFn = function(fn){
   return syncFn
 }
 // Use it to wait for asynchronous callback.
-sync.await = global.yield
+sync.await = Fiber.yield
 
 // Creates fiber-aware asynchronous callback resuming current fiber when it will be finished.
 sync.defer = function(){
