@@ -22,6 +22,8 @@ var sync = module.exports = function(){
   }
 }
 
+sync.Fiber = Fiber
+
 // Takes function and returns its synchronized version, it's still backward compatible and can
 // be used as asynchronous.
 sync.syncFn = function(fn){
