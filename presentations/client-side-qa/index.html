@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Client-Side QA</title>
+
+  <link href="impressjs/impress.css" rel="stylesheet"/>
+  <link href="style.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="impress" class="impress-not-supported">
+
+
+<div class="title step slide">
+  <h1>
+    <ul>
+      <li>Selenium</li>
+      <li>Phantom.js</li>
+      <li>Zombie.js</li>
+    </ul>
+  </h1>
+</div>
+
+<div class="title step slide">
+  <h1>
+    JavaScript
+    <br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vs.
+    </br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Others
+  </h1>
+</div>
+
+<div class="title step slide">
+  <h1>
+    <ul>
+      <li>Jasmine</li>
+      <li>Mocha.js</li>
+      <li>&nbsp;</li>
+      <li>Node.js</li>
+    </ul>
+  </h1>
+</div>
+
+<div class="title step slide">
+  <h1>
+    <ul>
+      <li>Stub</li>
+      <li>Sever</li>
+      <li>Prototype</li>
+    </ul>
+  </h1>
+</div>
+
+<div class="title step slide">
+  <h1>Image will be here</h1>
+</div>
+
+<div class="step slide">
+  <h1>Specifications</h1>
+  <pre class='code prettyprint'>
+browser.navigate("/blog")
+browser.should.have.text("Body")
+...
+  </pre>
+</div>
+
+<div class="step slide">
+  <h1>Evented code</h1>
+  <pre class='code prettyprint'>
+browser.navigate("/blog" \
+, function(){
+  browser.should.have.text("Body")
+  ...
+})
+  </pre>
+</div>
+
+<div class="step slide">
+  <h1>When it's done?</h1>
+  <pre class='code prettyprint'>
+browser.navigate("/blog")
+wait(function(err){
+  browser.should.have.text("Body")
+  ...
+})
+  </pre>
+</div>
+
+<div class="step slide">
+  <h1>Fibers</h1>
+  <pre class='code prettyprint'>
+browser.navigate("/blog")
+wait(function(err){
+  browser.should.have.text("Body")
+})
+...
+  </pre>
+</div>
+
+<div class="step slide">
+  <h1>CoffeeScript</h1>
+  <pre class='code prettyprint'>
+browser.navigate "/blog"
+wait ->
+  browser.should.have.text "Body"
+...
+  </pre>
+</div>
+
+<div class="step slide">
+  <h1>CoffeeScript</h1>
+  <pre class='code prettyprint'>
+browser.navigate "/blog"
+wait -> browser.should.have.text "Body"
+...
+  </pre>
+</div>
+
+<div class="title step slide">
+  <h1>
+    <ul>
+      <li>Zombie.js</li>
+      <li>Mocha.js</li>
+      <li>Node.js</li>
+      <li>Fibers / Synchronize.js</li>
+    </ul>
+  </h1>
+</div>
+
+</div>
+
+    <!-- Support -->
+
+    <div class="fallback-message">
+      <p>Your browser <b>doesn't support the features required</b> by impress.js,
+        so you are presented with a simplified version of this presentation.</p>
+      <p>For the best experience please use the latest <b>Chrome</b> or <b>Safari</b> browser.
+        Firefox 10 (to be released soon) will also handle it.</p>
+    </div>
+    </div>
+
+    <!-- <div class="hint">
+      <p>Use a spacebar or arrow keys to navigate</p>
+    </div> -->
+
+    <!-- Post-processing slides. -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="js.js"></script>
+
+    <!-- impress.js -->
+    <script src="impressjs/impress.js"></script>
+
+    <!-- Code highlighting -->
+    <link href="prettify/prettify.css" rel="stylesheet"/>
+    <script src="prettify/prettify.js"></script>
+    <script>
+      prettyPrint()
+    </script>
+  </body>
+</html>

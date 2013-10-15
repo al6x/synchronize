@@ -1,0 +1,47 @@
+.red {color: #c5060b;}
+.green {color: #036A07;}
+
+.slide {
+  font: 50px/1.62 Comic Sans MS, Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  font-weight: bold;
+  letter-spacing: -2px;
+}
+.slide h1 {
+  font: 70px/1.62 Comic Sans MS, Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  font-weight: bold;
+  margin-bottom: 20px;
+/*  color: #666;*/
+}
+.title h1 {
+  font: 70px/1.62 Comic Sans MS, Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  font-weight: bold;
+  color: #000;
+  margin-top: 130px;
+}
+.code {
+  margin-top: 40px;
+  font: 40px/1.62 Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  letter-spacing: -3px;
+}
+b {
+  color: #008;
+}
+.small {
+  font: 35px/1.62 Comic Sans MS, Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  color: #666;
+/*      font-style: italic;*/
+}
+.very-small {
+  font: 22px/1.62 Comic Sans MS, Monaco, "Bitstream Vera Sans Mono", "Lucida Console", Terminal, monospace;
+  letter-spacing: 0px;
+}
+
+/* Background image */
+.slide {
+  background-repeat:no-repeat;
+  background-position:right bottom;}
+}
+
+.table td {
+  margin-bottom: 20px;
+}
