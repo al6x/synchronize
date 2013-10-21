@@ -150,5 +150,8 @@ sync.fiber = function(cb, done){
 //   }))
 //
 sync.asyncIt = function(cb){
-  return function(done){sync.fiber(cb, done)}
+  return function(done){
+    var that = this
+    sync.fiber(function(){cb.call(that)}, done)
+  }
 }
