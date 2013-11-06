@@ -4,9 +4,10 @@ Documentation [http://alexeypetrushin.github.com/synchronize](http://alexeypetru
 
 Installation `npm install synchronize`
 
-Contributors
+Contributors:
 
 - [Alexey Petrushin](https://github.com/alexeypetrushin)
 - [d3m3vilurr](https://github.com/d3m3vilurr)
+- [James Manning](https://github.com/jamesmanning)
 
 Copyright (c) Alexey Petrushin, http://petrush.in, released under the MIT license.
