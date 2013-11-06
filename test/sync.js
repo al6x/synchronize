@@ -124,4 +124,12 @@ describe('Control Flow', function(){
       expect(calls).to.eql(['readA', 'readB', 'nextTick', 'nextTick'])
     }, done)
   })
+
+  beforeEach(function(){
+    this.someKey = 'some value'
+  })
+  it('should provide asyncIt helper for tests', sync.asyncIt(function(){
+    expect(Fiber.current).to.exist
+    expect(this.someKey).to.eql('some value')
+  }))
 })
