@@ -22,6 +22,7 @@ var sync = module.exports = function(){
   }
 }
 
+// Sometimes `Fiber` needed outside of `sync`.
 sync.Fiber = Fiber
 
 // Takes function and returns its synchronized version, it's still backward compatible and can
@@ -151,4 +152,57 @@ sync.fiber = function(cb, done){
 sync.asyncIt = function(cb){
   if(!cb) throw "no callback for async spec helper!"
   return function(done){sync.fiber(cb.bind(this), done)}
+}
+
+// Same as `sync` but with verbose logging for every method invocation.
+// Ignore this method, it shouldn't be used unless you want to track down
+// tricky and complex bugs and need full information abouth how and when all
+// this async stuff has been called.
+var fiberIdCounter = 1
+sync.syncWithDebug = function(){
+  if(arguments.length > 1){
+    // Synchronizing functions of object.
+    var obj = arguments[0]
+    for(var i = 1; i < arguments.length; i++){
+      (function(fname){
+        var fn = obj[fname]
+        if(!fn) throw new Error("object doesn't have '" + fname + "' function!")
+        var syncedFn = sync(fn)
+        obj[fname] = function(){
+          if(Fiber.current && Fiber.current._fiberId == undefined){
+            Fiber.current._fiberId = fiberIdCounter
+            fiberIdCounter = fiberIdCounter + 1
+            Fiber.current._callbackLevel = 0
+          }
+
+          var fiberId = '-'
+          if(Fiber.current){
+            fiberId = Fiber.current._fiberId
+            Fiber.current._callbackLevel = Fiber.current._callbackLevel + 1
+          }
+
+          var indent = '    '
+          if(Fiber.current)
+            for(var j = 0; j < Fiber.current._callbackLevel; j++) indent = indent + '  '
+
+          console.log(fiberId + indent + this.constructor.name + '.'
+            + fname + " called", JSON.stringify(arguments))
+
+          var result
+          try{
+            result = syncedFn.apply(this, arguments)
+          }finally{
+            console.log(fiberId + indent + this.constructor.name + '.'
+              + fname + " finished")
+
+            if(Fiber.current)
+              Fiber.current._callbackLevel = Fiber.current._callbackLevel - 1
+          }
+          return result
+        }
+      })(arguments[i])
+    }
+  }else{
+    return sync.syncFn(arguments[0])
+  }
 }
