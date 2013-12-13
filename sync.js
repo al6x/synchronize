@@ -110,6 +110,77 @@ sync.deferParallel = function(){
   }
 }
 
+sync.defers = function(){
+  if(!Fiber.current) throw new Error("no current Fiber, defer can'b be used without Fiber!")
+  if(Fiber.current._syncParallel)
+    return sync.defersParallel.apply(sync, arguments)
+  else
+    return sync.defersSerial.apply(sync, arguments)
+}
+
+sync.defersSerial = function(){
+  var fiber = Fiber.current;
+  if(!fiber) throw new Error("no current Fiber, defer can'b be used without Fiber!")
+
+  var kwds = Array.prototype.slice.call(arguments)
+  // Returning asynchronous callback.
+  return function(err) {
+    // Wrapping in nextTick as a safe measure against not asynchronous usage.
+    var args = Array.prototype.slice.call(arguments, 1)
+    process.nextTick(function(){
+      if (err) {
+        // Resuming fiber and throwing error.
+        fiber.throwInto(err)
+      }
+      var results;
+      if(!kwds.length){
+        results = args
+      } else {
+        results = {}
+        kwds.forEach(function(kwd, i){
+          results[kwd]=args[i]
+        })
+      }
+      fiber.run(results)
+    })
+  }
+}
+
+sync.defersParallel = function(){
+  var fiber = Fiber.current
+  if(!fiber) throw new Error("no current Fiber, defer can'b be used without Fiber!")
+  if(!fiber._syncParallel) throw new Error("invalid usage, should be called in parallel mode!")
+  var data = fiber._syncParallel
+  // Counting amount of `defer` calls.
+  data.called += 1
+  var resultIndex = data.called - 1
+
+  var kwds = Array.prototype.slice.call(arguments)
+  // Returning asynchronous callback.
+  return function(err) {
+    // Wrapping in nextTick as a safe measure against not asynchronous usage.
+    var args = Array.prototype.slice.call(arguments, 1)
+    process.nextTick(function(){
+      if (err) {
+        // Resuming fiber and throwing error.
+        fiber.throwInto(err)
+      }
+      var results;
+      if(!kwds.length){
+        results = args
+      } else {
+        results = {}
+        kwds.forEach(function(kwd, i){
+          results[kwd]=args[i]
+        })
+      }
+      data.returned += 1
+      data.results[resultIndex] = results
+      if(data.returned == data.called) fiber.run(data.results)
+    })
+  }
+}
+
 // Support for parallel calls, all `defer` calls within callback will be
 // performed in parallel.
 sync.parallel = function(cb){
