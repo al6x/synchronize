@@ -1,4 +1,5 @@
 var sync   = require('../sync')
+var Fiber = require('fibers')
 var expect = require('chai').expect
 
 describe('Control Flow', function(){
@@ -122,6 +123,49 @@ describe('Control Flow', function(){
 
       expect(results).to.eql(['dataA', 'dataB'])
       expect(calls).to.eql(['readA', 'readB', 'nextTick', 'nextTick'])
+    }, done)
+  })
+
+  it('should support multiple arguments', function(done){
+    sync.fiber(function(){
+      var read = function(cb){
+        process.nextTick(function(){
+          cb(null, 'data1', 'data2')
+        })
+      }
+
+      var result = sync.await(read(sync.defers()))
+      expect(result).to.eql(['data1', 'data2'])
+    }, done)
+  })
+
+  it('should support multiple `named` arguments', function(done){
+    sync.fiber(function(){
+      var read = function(cb){
+        process.nextTick(function(){
+          cb(null, 'data1', 'data2')
+        })
+      }
+
+      var result = sync.await(read(sync.defers('a', 'b')))
+      expect(result).to.eql({a: 'data1', b: 'data2'})
+    }, done)
+  })
+
+  it('should support multiple arguments parallel calls', function(done){
+    sync.fiber(function(){
+      var read = function(cb){
+        process.nextTick(function(){
+          cb(null, 'data1', 'data2')
+        })
+      }
+
+      sync.parallel(function(){
+        read(sync.defers())
+        read(sync.defers('a', 'b'))
+      })
+      var results = sync.await()
+      expect(results).to.eql([['data1', 'data2'], {a: 'data1', b: 'data2'}])
     }, done)
   })
 
