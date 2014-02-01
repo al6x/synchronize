@@ -198,7 +198,12 @@ sync.parallel = function(cb){
 // if `done` not provided it will be just rethrown.
 sync.fiber = function(cb, done){
   var that = this
+  var started = false
   Fiber(function(){
+    if (started) {
+      return
+    }
+    started = true
     if (done) {
       try {
         cb.call(that)
