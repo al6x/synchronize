@@ -125,7 +125,7 @@ asyncFn = sync(asyncFn)
 
 var data = asyncFn(input)
 // You can still use the async form of this fn
-var data = sync.await(asyncFn(input), sync.defer())
+var data = sync.await(asyncFn(input, sync.defer()))
 asyncFn(input, function(err, data)){}
 </pre>
             </div>
