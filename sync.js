@@ -189,7 +189,7 @@ sync.parallel = function(cb){
 
   // Enabling `defer` calls to be performed in parallel.
   fiber._syncParallel = {called: 0, returned: 0, results: []}
-  cb()
+  cb.call(this)
   delete fiber._syncParallel
 }
 
@@ -201,8 +201,8 @@ sync.fiber = function(cb, done){
   Fiber(function(){
     if (done) {
       try {
-        cb.call(that)
-        done()
+        var result = cb.call(that)
+        done(null, result)
       } catch (error){
         done(error)
       }

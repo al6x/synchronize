@@ -169,6 +169,16 @@ describe('Control Flow', function(){
     }, done)
   })
 
+  it('should return result from fiber', function(done){
+    sync.fiber(function(){
+      return 'some value'
+    }, function(err, result){
+      expect(err).to.eql(null)
+      expect(result).to.eql('some value')
+      done()
+    })
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })
