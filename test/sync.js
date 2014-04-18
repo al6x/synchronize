@@ -179,6 +179,22 @@ describe('Control Flow', function(){
     })
   })
 
+  it('should abort on timeout', function(done){
+    sync.fiber(function(){
+      defer = sync.deferWithTimeout(100)
+      setTimeout(function(){defer(null, 'some result')}, 10)
+      expect(sync.await()).to.eql('some result')
+
+      try{
+        defer = sync.deferWithTimeout(1)
+        setTimeout(function(){defer(null, 'some result')}, 10)
+        sync.await()
+      }catch(err){
+        expect(err.message).to.eql('defer timed out!')
+      }
+    }, done)
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })

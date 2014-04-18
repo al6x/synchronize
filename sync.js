@@ -63,6 +63,27 @@ sync.defer = function(){
     return sync.deferSerial()
 }
 
+// Exactly the same as defer, but additionally it triggers an error if there's no response
+// on time.
+sync.deferWithTimeout = function(timeout){
+  if(!timeout) throw new Error("no timeout provided!")
+  var defer = this.defer()
+
+  var called = false
+  var d = setTimeout(function(){
+    if(called) return
+    called = true
+    defer(new Error("defer timed out!"))
+  }, timeout)
+
+  return function(){
+    if(called) return
+    called = true
+    clearTimeout(d)
+    return defer.apply(this, arguments)
+  }
+}
+
 //
 sync.deferSerial = function(){
   var fiber = Fiber.current
