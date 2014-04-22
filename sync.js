@@ -57,16 +57,15 @@ sync.await = Fiber.yield
 // Creates fiber-aware asynchronous callback resuming current fiber when it will be finished.
 sync.defer = function(){
   if(!Fiber.current) throw new Error("no current Fiber, defer can'b be used without Fiber!")
-  if(Fiber.current._syncParallel)
-    return sync.deferParallel()
-  else
-    return sync.deferSerial()
+  if(Fiber.current._syncParallel) return sync.deferParallel()
+  else return sync.deferSerial()
 }
 
 // Exactly the same as defer, but additionally it triggers an error if there's no response
 // on time.
 sync.deferWithTimeout = function(timeout){
   if(!timeout) throw new Error("no timeout provided!")
+  if(Fiber.current._syncParallel) throw new Error("deferWithTimeout can't be used in parallel!")
   var defer = this.defer()
 
   var called = false
@@ -93,6 +92,7 @@ sync.deferSerial = function(){
   return function(err, result){
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     process.nextTick(function(){
+      if(fiber._syncIsTerminated) return
       if(err){
         // Resuming fiber and throwing error.
         fiber.throwInto(err)
@@ -118,7 +118,11 @@ sync.deferParallel = function(){
   return function(err, result){
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     process.nextTick(function(){
+      if(fiber._syncIsTerminated) return
+      // Error in any of parallel call will result in aborting all of the calls.
+      if(data.errorHasBeenThrown) return
       if(err){
+        data.errorHasBeenThrown = true
         // Resuming fiber and throwing error.
         fiber.throwInto(err)
       }else{
@@ -133,10 +137,8 @@ sync.deferParallel = function(){
 
 sync.defers = function(){
   if(!Fiber.current) throw new Error("no current Fiber, defer can'b be used without Fiber!")
-  if(Fiber.current._syncParallel)
-    return sync.defersParallel.apply(sync, arguments)
-  else
-    return sync.defersSerial.apply(sync, arguments)
+  if(Fiber.current._syncParallel) return sync.defersParallel.apply(sync, arguments)
+  else return sync.defersSerial.apply(sync, arguments)
 }
 
 sync.defersSerial = function(){
@@ -149,6 +151,7 @@ sync.defersSerial = function(){
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     var args = Array.prototype.slice.call(arguments, 1)
     process.nextTick(function(){
+      if(fiber._syncIsTerminated) return
       if (err) {
         // Resuming fiber and throwing error.
         fiber.throwInto(err)
@@ -182,7 +185,12 @@ sync.defersParallel = function(){
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     var args = Array.prototype.slice.call(arguments, 1)
     process.nextTick(function(){
+      if(fiber._syncIsTerminated) return
+
+      // Error in any of parallel call will result in aborting all of the calls.
+      if(data.errorHasBeenThrown) return
       if (err) {
+        data.errorHasBeenThrown = true
         // Resuming fiber and throwing error.
         fiber.throwInto(err)
       }
@@ -209,9 +217,14 @@ sync.parallel = function(cb){
   if(!fiber) throw new Error("no current Fiber, defer can'b be used without Fiber!")
 
   // Enabling `defer` calls to be performed in parallel.
-  fiber._syncParallel = {called: 0, returned: 0, results: []}
-  cb.call(this)
-  delete fiber._syncParallel
+  // There's an important note - error in any parallel call will result in aborting
+  // all of the parallel calls.
+  fiber._syncParallel = {called: 0, returned: 0, results: [], errorHasBeenThrown: false}
+  try{
+    cb.call(this)
+  }finally{
+    delete fiber._syncParallel
+  }
 }
 
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
@@ -223,6 +236,7 @@ sync.fiber = function(cb, done){
     if (done) {
       try {
         var result = cb.call(that)
+        Fiber.current._syncIsTerminated = true
         done(null, result)
       } catch (error){
         done(error)
@@ -230,6 +244,7 @@ sync.fiber = function(cb, done){
     } else {
       // Don't catch errors if done not provided!
       cb.call(that)
+      Fiber.current._syncIsTerminated = true
     }
   }).run()
 }
