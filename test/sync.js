@@ -169,6 +169,25 @@ describe('Control Flow', function(){
     }, done)
   })
 
+  it('should fiber call just once at raise error', function(done){
+    var read = function(cb){
+      process.nextTick(function(){
+        cb(new Error('an error'))
+      })
+    }
+
+    var called = 0
+    sync.fiber(function(){
+      called += 1
+      sync.await(read(sync.defers()))
+    }, function() {})
+
+    setTimeout(function(){
+      expect(called).to.eql(1)
+      done()
+    }, 100)
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })
