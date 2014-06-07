@@ -52,31 +52,36 @@ a = function(){
             </h1>
           </div>
           <p>
-            Use <code>await</code> and <code>defer</code> to execute asynchronous function
+            Use <code>await</code> and <code>defer</code> to execute asynchronous functions
             synchronously.
-            Result of cb will be returned as return value, in case of error it will be
-            thrown and can be intercepted by try/catch statement.
           </p>
           <p>
-            Or You can synchronize function <code>sync(fn)</code> and it will use await/defer
+            Synchronize assumes node-style <code>(err, result)</code> callbacks.
+            The second parameter given to the cb will be returned.
+            If an error is present it will be thrown and can be intercepted by a try/catch statement.
+            Multiple and named arguments are supported with <code>defers</code>.
+          </p>
+          <p>
+            You can use the helper <code>sync(fn)</code> and it will use await/defer
             automatically.
-            It's <strong>backward compatible</strong> and can be called synchronously or
-            asynchronously if You provide cb.
+            The helper is non-destructive and the function can still be called asynchronously
+            if called with a callback.
             You can also mix it with other synchronous or asynchronous code.
           </p>
           <p>
-            Use await/defer manually to get more control or automatically to write compact and clean code.
+            Use <code>await</code>/<code>defer</code> manually to get precise control or automatically to write compact and clean code.
           </p>
 
           <p>
-            Install it with <code>npm install synchronize</code> command.
+            Install it with <code>npm install synchronize</code>.
           </p>
 
           <p>
-            The project hosted on
-            <a href='http://github.com/alexeypetrushin/synchronize'>GitHub</a>
+            The project is hosted on
+            <a href='http://github.com/alexeypetrushin/synchronize'>GitHub</a>.
+            <br>
             You can report bugs and discuss features on the
-            <a href='http://github.com/alexeypetrushin/synchronize/issues'>Issues</a> page
+            <a href='http://github.com/alexeypetrushin/synchronize/issues'>Issues</a> page.
           </p>
 
           <!-- How to use -->
@@ -89,13 +94,13 @@ data = sync.await(fs.readFile(fname, sync.defer()))
             </div>
             <div class='span5'>
               <p>
-                Use <code>await</code> and <code>defer</code> keywords by hands
-                to call function synchronously (you can make await and defer global
+                Use <code>await</code> and <code>defer</code> keywords by hand
+                to call a function synchronously (you can make await and defer global
                 to make things shorter).
               </p>
             </div>
           </div>
-          <div class='row'>
+          <div class='row' style="margin-top: 10px">
             <div class='span5'>
 <pre class='prettyprint'>
 sync(fs, 'readFile')
@@ -106,9 +111,29 @@ fs.readFile(fname, function(err, data)){}
             </div>
             <div class='span5'>
               <p>
-                Synchronize function, after it You can use it in both ways -
-                synchronous or asynchronous.
-                Basically it uses the same await/defer but automatically.
+                Use <code>sync()</code> to make an async function synchronize.js-aware.
+                You can use it in both ways - synchronous or asynchronous.
+                Basically it uses the same await/defer pattern, but automatically.
+                This object form preserves context, unlike the form below.
+              </p>
+            </div>
+          </div>
+          <div class='row' style="margin-top: 10px">
+            <div class='span5'>
+<pre class='prettyprint'>
+asyncFn = sync(asyncFn)
+
+var data = asyncFn(input)
+// You can still use the async form of this fn
+var data = sync.await(asyncFn(input, sync.defer()))
+asyncFn(input, function(err, data)){}
+</pre>
+            </div>
+            <div class='span5'>
+              <p>
+                You can use <code>sync()</code> on a bare function to return
+                a synchronized version of the function. It can still be used
+                in asynchronous form.
               </p>
             </div>
           </div>
@@ -144,16 +169,16 @@ sync.fiber(function(){
             <div class='span5'>
               <p>
                 In order to use synchronized functions and pause execution without blocking Node.js we
-                need to wrap execution into <code>Fiber</code>.
+                need to wrap execution into a <code>Fiber</code> using <code>sync.fiber()</code>.
               </p>
-              <p>
+              <p style="margin-top:50px">
                 Inside of Fiber we can call asynchronous functions as if it's synchronous.
               </p>
-              <p>
-                We can also use standard try/catch statement to catch asynchronous errors.
+              <p style="margin-top:30px">
+                We can also use standard try/catch statements to catch asynchronous errors.
               </p>
-              <p>
-                Or call readFile asynchronously if we wish so.
+              <p style="margin-top:70px">
+                Or call readFile asynchronously if we wish.
               </p>
             </div>
           </div>
@@ -165,7 +190,7 @@ sync.fiber(function(){
           </p>
           <div class='row'>
             <div class='span5'>
-              <p>Using synchronize</p>
+              <h3>Using synchronize</h3>
 <pre class='prettyprint'>
 var sync = require('synchronize')
 var fs   = require('fs')
@@ -186,7 +211,7 @@ sync.fiber(function(){
 </pre>
             </div>
             <div class='span5'>
-              <p>The same code without synchronization</p>
+              <h3>The same code without synchronization</h3>
 <pre class='prettyprint'>
 var fs = require('fs')
 
@@ -215,6 +240,114 @@ fs.readdir('.', function(err, paths){
             </div>
           </div>
 
+          <h2>Parallel and serial operations</h2>
+          <p>
+            Synchronize.js can run multiple operations in parallel using
+            <code>sync.parallel()</code>.
+          </p>
+          <div class='row'>
+            <div class='span5'>
+              <h3>Async operations in serial</h3>
+<pre class='prettyprint'>
+var sync = require('synchronize')
+
+var read = function(a, cb) {
+  setTimeout(function(){
+    // remember that callbacks expect (err, result)
+    cb(null, a)
+  }, 1000)
+}
+
+// We can use the `sync` helper here to avoid using
+// `await()` and `defer()` manually.
+read = sync(read);
+
+sync.fiber(function() {
+  var results = []
+  results.push(read(1)))
+  results.push(read(2)))
+  // results now contains [1,2]
+})
+</pre>
+            </div>
+            <div class='span5'>
+              <h3>Async operations in parallel</h3>
+<pre class='prettyprint'>
+var sync = require('synchronize')
+
+function read(a, cb) {
+  setTimeout(function(){
+    cb(null, a)
+  }, 1000)
+}
+
+// Runs in parallel
+sync.fiber(function() {
+  sync.parallel(function() {
+    // You must call defer() manually within
+    // a parallel operation.
+    read(1, sync.defer())
+    read(2, sync.defer())
+  });
+  var results = sync.await()
+  // results now contains [1,2]
+});
+</pre>
+            </div>
+          </div>
+
+          <h2>Multiple arguments in callbacks</h2>
+          <p>
+            Synchronize.js accepts multiple arguments in callbacks using <code>sync.defers()</code>.
+          </p>
+          <div class='row'>
+            <div class='span5'>
+              <h3>Multiple arguments in serial</h3>
+<pre class='prettyprint'>
+var sync = require('synchronize')
+
+function read(a, b, c, cb) {
+  setTimeout(function(){
+    cb(null, a, b, c)
+  }, 1000)
+}
+
+sync.fiber(function() {
+  // Returns [1,2,3]
+  var results = sync.await(
+    read(1, 2, 3, sync.defers()))
+  // Returns {a: 1, b: 2, c: 3}
+  var namedResults = sync.await(
+    read(4, 5, 6, sync.defers('a', 'b', 'c')))
+})
+</pre>
+            </div>
+            <div class='span5'>
+              <h3>Multiple arguments in parallel</h3>
+<pre class='prettyprint'>
+var sync = require('synchronize')
+
+function read(a, b, c, cb) {
+  setTimeout(function(){
+    cb(null, a, b, c)
+  }, 1000)
+}
+
+sync.fiber(function() {
+  sync.parallel(function(){
+    read(1, 2, 3, sync.defers())
+    read(4, 5, 6, sync.defers())
+  });
+  // returns [[1,2,3],[4,5,6]]
+  var results = sync.await()
+  // concat to get [1,2,3,4,5,6]
+  results = [].concat.apply([], results)
+})
+</pre>
+            </div>
+          </div>
+
+
           <h2>Usage with Express.js</h2>
           <div class='row'>
             <div class='span5'>
@@ -241,7 +374,7 @@ app.listen(3000)
             <div class='span5'>
               <p>Synchronized code can be mixed with asynchronous code in any combination.</p>
               <p>
-                Here are one of possible way to use it with Express.js.</p>
+                Here is one possible way to use it with Express.js.</p>
             </div>
           </div>
 
@@ -265,14 +398,14 @@ describe('File System', function(){
             </div>
             <div class='span5'>
               <p>
-                You can use <code>sync.asyncIt</code> helper to greatly simplify writing of
+                You can use the <code>sync.asyncIt</code> helper to greatly simplify writing
                 asynchronous tests.
               </p>
 
               <p>
                 You may also take a look at
                 <a href='https://github.com/alexeypetrushin/mongo-lite/blob/master/test/collection.coffee'>
-                  real-life test scenario</a>
+                  this real-life test scenario</a>
                 that uses synchronize to simplify asynchronous calls for MongoDB.
               </p>
             </div>

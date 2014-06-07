@@ -1,8 +1,14 @@
+require('longjohn')
+
 var sync   = require('../sync')
 var Fiber = require('fibers')
 var expect = require('chai').expect
 
 describe('Control Flow', function(){
+  var waitAndReturn = function(time, err, value, cb){
+    setTimeout(function(){cb(err, value)}, time)
+  }
+
   var fn = function(arg, cb){
     expect(arg).to.eql('something')
     process.nextTick(function(){
@@ -186,6 +192,126 @@ describe('Control Flow', function(){
       expect(called).to.eql(1)
       done()
     }, 100)
+  })
+
+  it('should handle parallel errors', function(done){
+    sync.fiber(function(){
+      var calls = []
+      var readA = function(cb){
+        process.nextTick(function(){
+          cb(new Error("error a"))
+        })
+      }
+      var readB = function(cb){
+        process.nextTick(function(){
+          cb(new Error("error b"))
+        })
+      }
+
+      try {
+        sync.parallel(function(){
+          readA(sync.defer())
+          readB(sync.defer())
+        })
+        var results = sync.await()
+      }catch(err){
+        if(err.message == 'error a') expect(err.message).to.eql('error a')
+        else expect(err.message).to.eql('error b')
+      }
+    }, done)
+  })
+
+  it('should handle parallel errors with multiple arguments', function(done){
+    sync.fiber(function(){
+      var calls = []
+      var readA = function(cb){
+        process.nextTick(function(){
+          cb(new Error("error a"))
+        })
+      }
+      var readB = function(cb){
+        process.nextTick(function(){
+          cb(new Error("error b"))
+        })
+      }
+
+      try {
+        sync.parallel(function(){
+          readA(sync.defers())
+          readB(sync.defers())
+        })
+        var results = sync.await()
+      }catch(err){
+        if(err.message == 'error a') expect(err.message).to.eql('error a')
+        else expect(err.message).to.eql('error b')
+      }
+    }, done)
+  })
+
+  it('should return result from fiber', function(done){
+    sync.fiber(function(){
+      return 'some value'
+    }, function(err, result){
+      expect(err).to.eql(null)
+      expect(result).to.eql('some value')
+      done()
+    })
+  })
+
+  it('should abort on timeout', function(done){
+    sync.fiber(function(){
+      waitAndReturn(10, null, 'some result', sync.deferWithTimeout(100))
+      expect(sync.await()).to.eql('some result')
+
+      try{
+        waitAndReturn(10, null, 'some result', sync.deferWithTimeout(1))
+        expect(sync.await()).to.eql('some result')
+      }catch(err){
+        expect(err.message).to.eql('defer timed out!')
+      }
+    }, done)
+  })
+
+  // TODO, add also the same specs for `defers`.
+  it('should not resume terminated fiber with value', function(done){
+    var runCount = 0
+    var results = []
+    sync.fiber(function(){
+      runCount += 1
+      waitAndReturn(1, null, 'some value', sync.defer())
+    }, function(err){
+      results.push(err || null)
+    })
+
+    // Need to wait for some time after the fiber ends its execution to make sure
+    // it won't be runned one more time.
+    setTimeout(function(){
+      expect(runCount).to.eql(1)
+      expect(results.length).to.eql(1)
+      expect(results[0]).to.eql(null)
+      done()
+    }, 10)
+  })
+
+  // TODO, add also the same specs for `defers`.
+  it('should not resume terminated fiber with error', function(done){
+    var runCount = 0
+    var results = []
+    sync.fiber(function(){
+      runCount += 1
+      waitAndReturn(1, (new Error('some error')), null, sync.defer())
+    }, function(err){
+      results.push(err)
+    })
+
+    // Need to wait for some time after the fiber ends its execution to make sure
+    // it won't be runned one more time.
+    setTimeout(function(){
+      expect(runCount).to.eql(1)
+      expect(results.length).to.eql(1)
+      expect(results[0]).to.eql(null)
+      done()
+    }, 10)
   })
 
   beforeEach(function(){
