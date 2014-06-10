@@ -155,17 +155,18 @@ sync.defersSerial = function(){
       if (err) {
         // Resuming fiber and throwing error.
         fiber.throwInto(err)
-      }
-      var results;
-      if(!kwds.length){
-        results = args
       } else {
-        results = {}
-        kwds.forEach(function(kwd, i){
-          results[kwd]=args[i]
-        })
+        var results;
+        if(!kwds.length){
+          results = args
+        } else {
+          results = {}
+          kwds.forEach(function(kwd, i){
+            results[kwd]=args[i]
+          })
+        }
+        fiber.run(results)
       }
-      fiber.run(results)
     })
   }
 }
