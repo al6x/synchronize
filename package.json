@@ -1,7 +1,7 @@
 {
   "name"         : "synchronize",
   "main"         : "./sync",
-  "version"      : "0.9.3",
+  "version"      : "0.9.4",
   "homepage"     : "http://alexeypetrushin.github.com/synchronize",
   "dependencies" : {
     "fibers" : "1.0.x"
