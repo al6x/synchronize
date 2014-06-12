@@ -1,4 +1,4 @@
-require('longjohn')
+// require('longjohn')
 
 var sync   = require('../sync')
 var Fiber = require('fibers')
