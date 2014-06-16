@@ -314,6 +314,19 @@ describe('Control Flow', function(){
     }, 10)
   })
 
+  it('should call terminate callback just once', function(done) {
+    var callCount = 0
+    var callback = function(error) {
+      callCount += 1
+      throw new Error('some error')
+    }
+    expect(function() {sync.fiber(function() {}, callback)}).to.throw(Error)
+    setTimeout(function() {
+      expect(callCount).to.eql(1)
+      done()
+    }, 10)
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })
