@@ -235,13 +235,14 @@ sync.fiber = function(cb, done){
   var that = this
   Fiber(function(){
     if (done) {
+      var result
       try {
-        var result = cb.call(that)
+        result = cb.call(that)
         Fiber.current._syncIsTerminated = true
-        done(null, result)
       } catch (error){
-        done(error)
+        return done(error)
       }
+      done(null, result)
     } else {
       // Don't catch errors if done not provided!
       cb.call(that)
