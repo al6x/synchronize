@@ -1,3 +1,5 @@
+/*jshint node: true, indent:2, loopfunc: true, asi: true, undef:true*/
+
 var Fiber = require('fibers')
 
 // Takes function and returns its synchronized version, it's still backward compatible and
@@ -278,7 +280,7 @@ sync.syncWithDebug = function(){
         if(!fn) throw new Error("object doesn't have '" + fname + "' function!")
         var syncedFn = sync(fn)
         obj[fname] = function(){
-          if(Fiber.current && Fiber.current._fiberId == undefined){
+          if(Fiber.current && Fiber.current._fiberId === undefined){
             Fiber.current._fiberId = fiberIdCounter
             fiberIdCounter = fiberIdCounter + 1
             Fiber.current._callbackLevel = 0
@@ -294,15 +296,15 @@ sync.syncWithDebug = function(){
           if(Fiber.current)
             for(var j = 0; j < Fiber.current._callbackLevel; j++) indent = indent + '  '
 
-          console.log(fiberId + indent + this.constructor.name + '.'
-            + fname + " called", JSON.stringify(arguments))
+          console.log(fiberId + indent + this.constructor.name + '.' +
+          fname + " called", JSON.stringify(arguments))
 
           var result
           try{
             result = syncedFn.apply(this, arguments)
           }finally{
-            console.log(fiberId + indent + this.constructor.name + '.'
-              + fname + " finished")
+            console.log(fiberId + indent + this.constructor.name + '.' +
+            fname + " finished")
 
             if(Fiber.current)
               Fiber.current._callbackLevel = Fiber.current._callbackLevel - 1
