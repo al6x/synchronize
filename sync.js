@@ -65,16 +65,17 @@ sync.defer = function(){
 
 // Exactly the same as defer, but additionally it triggers an error if there's no response
 // on time.
-sync.deferWithTimeout = function(timeout){
+sync.deferWithTimeout = function(timeout, message){
   if(!timeout) throw new Error("no timeout provided!")
   if(Fiber.current._syncParallel) throw new Error("deferWithTimeout can't be used in parallel!")
-  var defer = this.defer()
 
+  var defer = this.defer()
+  var error = new Error(message || "defer timed out!")
   var called = false
   var d = setTimeout(function(){
     if(called) return
     called = true
-    defer(new Error("defer timed out!"))
+    defer(error)
   }, timeout)
 
   return function(){
