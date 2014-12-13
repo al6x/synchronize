@@ -10,5 +10,6 @@ Contributors:
 - [d3m3vilurr](https://github.com/d3m3vilurr)
 - [James Manning](https://github.com/jamesmanning)
 - [ssafejava](https://github.com/ssafejava)
+- [Brad Vogel](https://github.com/bradvogel)
 
 Copyright (c) Alexey Petrushin, http://petrush.in, released under the MIT license.
