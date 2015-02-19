@@ -11,5 +11,6 @@ Contributors:
 - [James Manning](https://github.com/jamesmanning)
 - [ssafejava](https://github.com/ssafejava)
 - [Brad Vogel](https://github.com/bradvogel)
+- [grassick](https://github.com/grassick)
 
 Copyright (c) Alexey Petrushin, http://petrush.in, released under the MIT license.
