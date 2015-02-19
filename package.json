@@ -3,6 +3,10 @@
   "main"         : "./sync",
   "version"      : "0.9.9",
   "homepage"     : "http://alexeypetrushin.github.com/synchronize",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexeypetrushin/synchronize.git"
+  },
   "dependencies" : {
     "fibers" : "1.0.x"
   },
