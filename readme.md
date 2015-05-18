@@ -12,5 +12,6 @@ Contributors:
 - [ssafejava](https://github.com/ssafejava)
 - [Brad Vogel](https://github.com/bradvogel)
 - [grassick](https://github.com/grassick)
+- [Andrew Tamura](https://github.com/andrewtamura)
 
 Copyright (c) Alexey Petrushin, http://petrush.in, released under the MIT license.
