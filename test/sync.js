@@ -327,6 +327,58 @@ describe('Control Flow', function(){
     }, 10)
   })
 
+  it('should be raise error at call defer twice', function(done){
+    sync.fiber(function(){
+      var defer = sync.defer()
+      defer()
+      sync.await()
+      expect(defer).to.throw(Error)
+    }, done)
+  })
+
+  it('should call defer just once in fiber process', function(done){
+    var broken = function(cb) {
+      sync.fiber(function() {
+        cb()
+      }, cb)
+    }
+    sync.fiber(function(){
+      broken(sync.defer())
+      sync.await()
+      throw new Error('an error')
+    }, function(err) {
+      expect(err).to.exist
+      expect(err.message).to.eql("defer can't use twice")
+      done()
+    })
+  })
+
+  it('should be raise error at call defers twice', function(done){
+    sync.fiber(function(){
+      var defer = sync.defers()
+      defer()
+      sync.await()
+      expect(defer).to.throw(Error)
+    }, done)
+  })
+
+  it('should prevent defers call just once in fiber process', function(done){
+    var broken = function(cb) {
+      sync.fiber(function() {
+        cb()
+      }, cb)
+    }
+    sync.fiber(function(){
+      broken(sync.defers())
+      sync.await()
+      throw new Error('an error')
+    }, function(err) {
+      expect(err).to.exist
+      expect(err.message).to.eql("defer can't use twice")
+      done()
+    })
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })
