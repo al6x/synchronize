@@ -379,6 +379,33 @@ describe('Control Flow', function(){
     })
   })
 
+  it('should prevent restart fiber', function(done){
+    var currentFiber
+    var called = 0
+    sync.fiber(function(){
+      called += 1
+      currentFiber = sync.Fiber.current
+    })
+    setTimeout(function() {
+      currentFiber.run()
+    }, 1)
+    setTimeout(function() {
+      expect(called).to.eql(1)
+      done()
+    }, 10);
+  })
+
+  it('should raise error when not matched defer-await pair', function(done){
+    sync.fiber(function(){
+	    process.nextTick(sync.defer());
+      expect(function() { process.nextTick(sync.defer()) }).to.throw(Error)
+      sync.await()
+	    process.nextTick(sync.defers());
+      expect(function() { process.nextTick(sync.defers()) }).to.throw(Error)
+      sync.await()
+    }, done)
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })
