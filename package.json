@@ -1,7 +1,7 @@
 {
   "name"         : "synchronize",
   "main"         : "./sync",
-  "version"      : "0.9.11",
+  "version"      : "0.9.12",
   "homepage"     : "http://alexeypetrushin.github.com/synchronize",
   "repository": {
     "type": "git",

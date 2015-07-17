@@ -327,7 +327,7 @@ describe('Control Flow', function(){
     }, 10)
   })
 
-  it('should be raise error at call defer twice', function(done){
+  it('should throw error if defer called twice', function(done){
     sync.fiber(function(){
       var defer = sync.defer()
       defer()
@@ -336,7 +336,7 @@ describe('Control Flow', function(){
     }, done)
   })
 
-  it('should call defer just once in fiber process', function(done){
+  it('should call defer only once in the fiber process', function(done){
     var broken = function(cb) {
       sync.fiber(function() {
         cb()
@@ -348,12 +348,12 @@ describe('Control Flow', function(){
       throw new Error('an error')
     }, function(err) {
       expect(err).to.exist
-      expect(err.message).to.eql("defer can't use twice")
+      expect(err.message).to.eql("defer can't be used twice!")
       done()
     })
   })
 
-  it('should be raise error at call defers twice', function(done){
+  it('should throw error if defers called twice', function(done){
     sync.fiber(function(){
       var defer = sync.defers()
       defer()
@@ -374,7 +374,7 @@ describe('Control Flow', function(){
       throw new Error('an error')
     }, function(err) {
       expect(err).to.exist
-      expect(err.message).to.eql("defer can't use twice")
+      expect(err.message).to.eql("defer can't be used twice!")
       done()
     })
   })
@@ -395,7 +395,7 @@ describe('Control Flow', function(){
     }, 10);
   })
 
-  it('should raise error when not matched defer-await pair', function(done){
+  it('should throw error when not matched defer-await pair', function(done){
     sync.fiber(function(){
 	    process.nextTick(sync.defer());
       expect(function() { process.nextTick(sync.defer()) }).to.throw(Error)

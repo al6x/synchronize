@@ -94,15 +94,14 @@ sync.deferSerial = function(){
   if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
   fiber._defered = true
   // Prevent recursive call
-  var called = 0
+  var called = false
   // Returning asynchronous callback.
   return function(err, result){
-    called += 1
-    if (called > 1) throw new Error("defer can't use twice")
+    if (called) throw new Error("defer can't be used twice!")
+    called = true
 
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     process.nextTick(function(){
-      if(called > 1) return
       fiber._defered = false
       if(fiber._syncIsTerminated) return
       if(err){
@@ -162,15 +161,14 @@ sync.defersSerial = function(){
   var kwds = Array.prototype.slice.call(arguments)
 
   // Prevent recursive call
-  var called = 0
+  var called = false
   // Returning asynchronous callback.
   return function(err) {
-    called += 1
-    if (called > 1) throw new Error("defer can't use twice")
+    if (called) throw new Error("defer can't be used twice!")
+    called = true
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     var args = Array.prototype.slice.call(arguments, 1)
     process.nextTick(function(){
-      if(called > 1) return
       fiber._defered = false
       if(fiber._syncIsTerminated) return
       if (err) {
