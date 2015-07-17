@@ -91,11 +91,19 @@ sync.deferWithTimeout = function(timeout, message){
 sync.deferSerial = function(){
   var fiber = Fiber.current
   if(!fiber) throw new Error("no current Fiber, defer can't be used without Fiber!")
-
+  if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
+  fiber._defered = true
+  // Prevent recursive call
+  var called = 0
   // Returning asynchronous callback.
   return function(err, result){
+    called += 1
+    if (called > 1) throw new Error("defer can't use twice")
+
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     process.nextTick(function(){
+      if(called > 1) return
+      fiber._defered = false
       if(fiber._syncIsTerminated) return
       if(err){
         // Resuming fiber and throwing error.
@@ -148,13 +156,22 @@ sync.defers = function(){
 sync.defersSerial = function(){
   var fiber = Fiber.current;
   if(!fiber) throw new Error("no current Fiber, defer can't be used without Fiber!")
+  if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
+  fiber._defered = true
 
   var kwds = Array.prototype.slice.call(arguments)
+
+  // Prevent recursive call
+  var called = 0
   // Returning asynchronous callback.
   return function(err) {
+    called += 1
+    if (called > 1) throw new Error("defer can't use twice")
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     var args = Array.prototype.slice.call(arguments, 1)
     process.nextTick(function(){
+      if(called > 1) return
+      fiber._defered = false
       if(fiber._syncIsTerminated) return
       if (err) {
         // Resuming fiber and throwing error.
@@ -237,7 +254,9 @@ sync.parallel = function(cb){
 // if `done` not provided it will be just rethrown.
 sync.fiber = function(cb, done){
   var that = this
-  Fiber(function(){
+  var fiber = Fiber(function(){
+    // Prevent restart fiber
+    if (fiber._started) return
     if (done) {
       var result
       try {
@@ -252,7 +271,9 @@ sync.fiber = function(cb, done){
       cb.call(that)
       Fiber.current._syncIsTerminated = true
     }
-  }).run()
+  })
+  fiber.run()
+  fiber._started = true
 }
 
 // Asynchronous wrapper for mocha.js tests.

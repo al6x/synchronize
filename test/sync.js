@@ -327,6 +327,85 @@ describe('Control Flow', function(){
     }, 10)
   })
 
+  it('should be raise error at call defer twice', function(done){
+    sync.fiber(function(){
+      var defer = sync.defer()
+      defer()
+      sync.await()
+      expect(defer).to.throw(Error)
+    }, done)
+  })
+
+  it('should call defer just once in fiber process', function(done){
+    var broken = function(cb) {
+      sync.fiber(function() {
+        cb()
+      }, cb)
+    }
+    sync.fiber(function(){
+      broken(sync.defer())
+      sync.await()
+      throw new Error('an error')
+    }, function(err) {
+      expect(err).to.exist
+      expect(err.message).to.eql("defer can't use twice")
+      done()
+    })
+  })
+
+  it('should be raise error at call defers twice', function(done){
+    sync.fiber(function(){
+      var defer = sync.defers()
+      defer()
+      sync.await()
+      expect(defer).to.throw(Error)
+    }, done)
+  })
+
+  it('should prevent defers call just once in fiber process', function(done){
+    var broken = function(cb) {
+      sync.fiber(function() {
+        cb()
+      }, cb)
+    }
+    sync.fiber(function(){
+      broken(sync.defers())
+      sync.await()
+      throw new Error('an error')
+    }, function(err) {
+      expect(err).to.exist
+      expect(err.message).to.eql("defer can't use twice")
+      done()
+    })
+  })
+
+  it('should prevent restart fiber', function(done){
+    var currentFiber
+    var called = 0
+    sync.fiber(function(){
+      called += 1
+      currentFiber = sync.Fiber.current
+    })
+    setTimeout(function() {
+      currentFiber.run()
+    }, 1)
+    setTimeout(function() {
+      expect(called).to.eql(1)
+      done()
+    }, 10);
+  })
+
+  it('should raise error when not matched defer-await pair', function(done){
+    sync.fiber(function(){
+	    process.nextTick(sync.defer());
+      expect(function() { process.nextTick(sync.defer()) }).to.throw(Error)
+      sync.await()
+	    process.nextTick(sync.defers());
+      expect(function() { process.nextTick(sync.defers()) }).to.throw(Error)
+      sync.await()
+    }, done)
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })
