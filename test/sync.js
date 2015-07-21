@@ -250,6 +250,16 @@ describe('Control Flow', function(){
     }, done)
   })
 
+  it('should not unwind when await is called after an empty parallel block', function(done){
+    sync.fiber(function(){
+      sync.parallel(function(){
+        // Imagine that the user intends to enumerate an array here, calling
+        // `defer` once per array item, but the array is empty.
+      })
+      expect(sync.await()).to.eql([])
+    }, done)
+  })
+
   it('should return result from fiber', function(done){
     sync.fiber(function(){
       return 'some value'
