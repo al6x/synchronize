@@ -1,3 +1,5 @@
+/*jshint node: true, indent:2, loopfunc: true, asi: true, undef:true, mocha: true */
+
 // require('longjohn')
 
 var sync   = require('../sync')
