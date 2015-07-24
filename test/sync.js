@@ -1,3 +1,5 @@
+/*jshint node: true, indent:2, loopfunc: true, asi: true, undef:true, mocha: true */
+
 // require('longjohn')
 
 var sync   = require('../sync')
@@ -245,6 +247,16 @@ describe('Control Flow', function(){
         if(err.message == 'error a') expect(err.message).to.eql('error a')
         else expect(err.message).to.eql('error b')
       }
+    }, done)
+  })
+
+  it('should not unwind when await is called after an empty parallel block', function(done){
+    sync.fiber(function(){
+      sync.parallel(function(){
+        // Imagine that the user intends to enumerate an array here, calling
+        // `defer` once per array item, but the array is empty.
+      })
+      expect(sync.await()).to.eql([])
     }, done)
   })
 

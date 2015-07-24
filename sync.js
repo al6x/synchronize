@@ -243,6 +243,17 @@ sync.parallel = function(cb){
   try{
     cb.call(this)
   }finally{
+    // If neither `defer` nor `defers` were called within the callback, we need
+    // to run the fiber ourselves or else the fiber will unwind when `await` is called.
+    // This might happen if the user intended to enumerate an array within the
+    // callback, calling `defer` once per array item, but the array was empty.
+    if (!fiber._syncParallel.called) {
+      process.nextTick(function(){
+        if(fiber._syncIsTerminated) return
+        // Return an empty array to represent that there were no results.
+        fiber.run([])
+      })
+    }
     delete fiber._syncParallel
   }
 }
