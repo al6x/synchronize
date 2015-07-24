@@ -249,9 +249,8 @@ sync.parallel = function(cb){
     // callback, calling `defer` once per array item, but the array was empty.
     if (!fiber._syncParallel.called) {
       process.nextTick(function(){
-        if(fiber._syncIsTerminated) return
-        // Return an empty array to represent that there were no results.
-        fiber.run([])
+        // Return an empty array to represent that there were no results.        
+        if(!fiber._syncIsTerminated) fiber.run([])
       })
     }
     delete fiber._syncParallel

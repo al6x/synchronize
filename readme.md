@@ -15,6 +15,7 @@ Contributors:
 - [Andrew Tamura](https://github.com/andrewtamura)
 
 Other resources:
+
 -[Patterns and anti-patterns using synchronize.js](https://mixmax.com/blog/node-fibers-using-synchronize-js)
 
 Copyright (c) Alexey Petrushin, http://petrush.in, released under the MIT license.
