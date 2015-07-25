@@ -13,6 +13,7 @@ Contributors:
 - [Brad Vogel](https://github.com/bradvogel)
 - [grassick](https://github.com/grassick)
 - [Andrew Tamura](https://github.com/andrewtamura)
+- [Jeff Wear](https://github.com/wearhere)
 
 Other resources:
 
