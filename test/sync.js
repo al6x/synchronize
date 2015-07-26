@@ -418,6 +418,33 @@ describe('Control Flow', function(){
     })(done)
   })
 
+  it('should provide handy helper to wrap functions in fiber', function(done){
+    var called = false
+    // Suppose we have a queue of messages and we want to be able to register
+    var queue = {
+      onMessage: function(cb){
+        // Queue supplies the `done` callback to the listener.
+        var done2 = function(){
+          expect(called).to.eql(true)
+          done()
+        }
+        cb(done2)
+      }
+    }
+    // We want to be able to register a handler listening for messages and
+    // automatically wrap it in fiber.
+    // Let's create the handler, it does nothing and wait for couple of milli
+    // seconds.
+    var handler = function(){
+      process.nextTick(sync.defer())
+      sync.await()
+      called = true
+    }
+
+    // Now let's register it on the queue and wrap inside of the fiber.
+    queue.onMessage(sync.fiber(handler))
+  })
+
   beforeEach(function(){
     this.someKey = 'some value'
   })
