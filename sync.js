@@ -249,7 +249,7 @@ sync.parallel = function(cb){
     // callback, calling `defer` once per array item, but the array was empty.
     if (!fiber._syncParallel.called) {
       process.nextTick(function(){
-        // Return an empty array to represent that there were no results.        
+        // Return an empty array to represent that there were no results.
         if(!fiber._syncIsTerminated) fiber.run([])
       })
     }
@@ -260,28 +260,32 @@ sync.parallel = function(cb){
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
 // if `done` not provided it will be just rethrown.
-sync.fiber = function(cb, done){
-  var that = this
-  var fiber = Fiber(function(){
-    // Prevent restart fiber
-    if (fiber._started) return
-    if (done) {
-      var result
-      try {
-        result = cb.call(that)
+sync.fiber = function(fn){
+  return function(cb){
+    cb = cb || function(){}
+    var that = this
+    var fiber = Fiber(function(){
+      // Prevent restart fiber
+      if (fiber._started) return
+      if (fn) {
+        var result
+        try {
+          result = fn.call(that)
+          Fiber.current._syncIsTerminated = true
+        } catch (error){
+          Fiber.current._syncIsTerminated = true
+          return cb(error)
+        }
+        cb.call(that, null, result)
+      } else {
+        // Don't catch errors if done not provided!
         Fiber.current._syncIsTerminated = true
-      } catch (error){
-        return done(error)
+        cb.call(that, null)
       }
-      done(null, result)
-    } else {
-      // Don't catch errors if done not provided!
-      cb.call(that)
-      Fiber.current._syncIsTerminated = true
-    }
-  })
-  fiber.run()
-  fiber._started = true
+    })
+    fiber.run()
+    fiber._started = true
+  }
 }
 
 // Asynchronous wrapper for mocha.js tests.
@@ -293,7 +297,7 @@ sync.fiber = function(cb, done){
 //
 sync.asyncIt = function(cb){
   if(!cb) throw "no callback for async spec helper!"
-  return function(done){sync.fiber(cb.bind(this), done)}
+  return function(done){sync.fiber(cb.bind(this))(done)}
 }
 
 // Same as `sync` but with verbose logging for every method invocation.

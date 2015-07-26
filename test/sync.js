@@ -22,21 +22,21 @@ describe('Control Flow', function(){
     sync.fiber(function(){
       var result = sync.await(fn('something', sync.defer()))
       expect(result).to.eql('ok')
-    }, done)
+    })(done)
   })
 
   it('should synchronize function', function(done){
     fn = sync(fn)
     sync.fiber(function(){
       expect(fn('something')).to.eql('ok')
-    }, done)
+    })(done)
   })
 
   it('should be save aginst synchronizing function twice', function(done){
     fn = sync(sync(fn))
     sync.fiber(function(){
       expect(fn('something')).to.eql('ok')
-    }, done)
+    })(done)
   })
 
   it('should allow call synchronized function explicitly', function(done){
@@ -62,7 +62,7 @@ describe('Control Flow', function(){
         err = e
       }
       expect(err.message).to.eql('an error')
-    }, done)
+    })(done)
   })
 
   it("should be compatible with not asynchronous cbs", function(done){
@@ -72,7 +72,7 @@ describe('Control Flow', function(){
     fn = sync(fn)
     sync.fiber(function(){
       expect(fn()).to.eql('ok')
-    }, done)
+    })(done)
   })
 
   it("should catch non asynchronous errors", function(done){
@@ -88,7 +88,7 @@ describe('Control Flow', function(){
         err = e
       }
       expect(err.message).to.eql('an error')
-    }, done)
+    })(done)
   })
 
   describe("Special cases", function(){
@@ -101,7 +101,7 @@ describe('Control Flow', function(){
         var start = new Date().getTime()
         sleep(50)
         expect(new Date().getTime()).to.be.greaterThan(start)
-      }, done)
+      })(done)
     })
   })
 
@@ -131,7 +131,7 @@ describe('Control Flow', function(){
 
       expect(results).to.eql(['dataA', 'dataB'])
       expect(calls).to.eql(['readA', 'readB', 'nextTick', 'nextTick'])
-    }, done)
+    })(done)
   })
 
   it('should support multiple arguments', function(done){
@@ -144,7 +144,7 @@ describe('Control Flow', function(){
 
       var result = sync.await(read(sync.defers()))
       expect(result).to.eql(['data1', 'data2'])
-    }, done)
+    })(done)
   })
 
   it('should support multiple `named` arguments', function(done){
@@ -157,7 +157,7 @@ describe('Control Flow', function(){
 
       var result = sync.await(read(sync.defers('a', 'b')))
       expect(result).to.eql({a: 'data1', b: 'data2'})
-    }, done)
+    })(done)
   })
 
   it('should support multiple arguments parallel calls', function(done){
@@ -174,7 +174,7 @@ describe('Control Flow', function(){
       })
       var results = sync.await()
       expect(results).to.eql([['data1', 'data2'], {a: 'data1', b: 'data2'}])
-    }, done)
+    })(done)
   })
 
   it('should fiber call just once at raise error', function(done){
@@ -188,7 +188,7 @@ describe('Control Flow', function(){
     sync.fiber(function(){
       called += 1
       sync.await(read(sync.defers()))
-    }, function() {})
+    })(function() {})
 
     setTimeout(function(){
       expect(called).to.eql(1)
@@ -220,7 +220,7 @@ describe('Control Flow', function(){
         if(err.message == 'error a') expect(err.message).to.eql('error a')
         else expect(err.message).to.eql('error b')
       }
-    }, done)
+    })(done)
   })
 
   it('should handle parallel errors with multiple arguments', function(done){
@@ -247,7 +247,7 @@ describe('Control Flow', function(){
         if(err.message == 'error a') expect(err.message).to.eql('error a')
         else expect(err.message).to.eql('error b')
       }
-    }, done)
+    })(done)
   })
 
   it('should not unwind when await is called after an empty parallel block', function(done){
@@ -257,13 +257,13 @@ describe('Control Flow', function(){
         // `defer` once per array item, but the array is empty.
       })
       expect(sync.await()).to.eql([])
-    }, done)
+    })(done)
   })
 
   it('should return result from fiber', function(done){
     sync.fiber(function(){
       return 'some value'
-    }, function(err, result){
+    })(function(err, result){
       expect(err).to.eql(null)
       expect(result).to.eql('some value')
       done()
@@ -281,7 +281,7 @@ describe('Control Flow', function(){
       }catch(err){
         expect(err.message).to.eql('defer timed out!')
       }
-    }, done)
+    })(done)
   })
 
   // TODO, add also the same specs for `defers`.
@@ -291,7 +291,7 @@ describe('Control Flow', function(){
     sync.fiber(function(){
       runCount += 1
       waitAndReturn(1, null, 'some value', sync.defer())
-    }, function(err){
+    })(function(err){
       results.push(err || null)
     })
 
@@ -312,7 +312,7 @@ describe('Control Flow', function(){
     sync.fiber(function(){
       runCount += 1
       waitAndReturn(1, (new Error('some error')), null, sync.defer())
-    }, function(err){
+    })(function(err){
       results.push(err)
     })
 
@@ -332,7 +332,7 @@ describe('Control Flow', function(){
       callCount += 1
       throw new Error('some error')
     }
-    expect(function() {sync.fiber(function() {}, callback)}).to.throw(Error)
+    expect(function() {sync.fiber(function() {})(callback)}).to.throw(Error)
     setTimeout(function() {
       expect(callCount).to.eql(1)
       done()
@@ -345,20 +345,20 @@ describe('Control Flow', function(){
       defer()
       sync.await()
       expect(defer).to.throw(Error)
-    }, done)
+    })(done)
   })
 
   it('should call defer only once in the fiber process', function(done){
     var broken = function(cb) {
       sync.fiber(function() {
         cb()
-      }, cb)
+      })(cb)
     }
     sync.fiber(function(){
       broken(sync.defer())
       sync.await()
       throw new Error('an error')
-    }, function(err) {
+    })(function(err) {
       expect(err).to.exist
       expect(err.message).to.eql("defer can't be used twice!")
       done()
@@ -371,20 +371,20 @@ describe('Control Flow', function(){
       defer()
       sync.await()
       expect(defer).to.throw(Error)
-    }, done)
+    })(done)
   })
 
   it('should prevent defers call just once in fiber process', function(done){
     var broken = function(cb) {
       sync.fiber(function() {
         cb()
-      }, cb)
+      })(cb)
     }
     sync.fiber(function(){
       broken(sync.defers())
       sync.await()
       throw new Error('an error')
-    }, function(err) {
+    })(function(err) {
       expect(err).to.exist
       expect(err.message).to.eql("defer can't be used twice!")
       done()
@@ -397,7 +397,7 @@ describe('Control Flow', function(){
     sync.fiber(function(){
       called += 1
       currentFiber = sync.Fiber.current
-    })
+    })()
     setTimeout(function() {
       currentFiber.run()
     }, 1)
@@ -415,12 +415,13 @@ describe('Control Flow', function(){
 	    process.nextTick(sync.defers());
       expect(function() { process.nextTick(sync.defers()) }).to.throw(Error)
       sync.await()
-    }, done)
+    })(done)
   })
 
   beforeEach(function(){
     this.someKey = 'some value'
   })
+
   it('should provide asyncIt helper for tests', sync.asyncIt(function(){
     expect(Fiber.current).to.exist
     expect(this.someKey).to.eql('some value')
