@@ -441,8 +441,11 @@ describe('Control Flow', function(){
       called = true
     }
 
+    // Now let's wrap handler in fiber.
+    var asyncHandler = sync.fiber(handler)
+
     // Now let's register it on the queue and wrap inside of the fiber.
-    queue.onMessage(sync.fiber(handler))
+    queue.onMessage(asyncHandler)
   })
 
   beforeEach(function(){
