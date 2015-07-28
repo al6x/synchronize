@@ -24,7 +24,7 @@ var sync = module.exports = function(){
   }
 }
 
-var nextTick = setImmediate || process.nextTick || function(cb) { setTimeout(cb, 0) }
+var nextTick = global.setImmediate || process.nextTick || function(cb) { setTimeout(cb, 0) }
 
 // Sometimes `Fiber` needed outside of `sync`.
 sync.Fiber = Fiber
