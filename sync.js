@@ -264,7 +264,7 @@ sync.fiber = function(cb, done){
   var that = this
   var fiber = Fiber(function(){
     // Prevent restart fiber
-    if (fiber._started) return
+    if (Fiber.current._started) return
     if (done) {
       var result
       try {
