@@ -24,6 +24,8 @@ var sync = module.exports = function(){
   }
 }
 
+var nextTick = setImmediate || process.nextTick || function(cb) { setTimeout(cb, 0) }
+
 // Sometimes `Fiber` needed outside of `sync`.
 sync.Fiber = Fiber
 
@@ -101,7 +103,7 @@ sync.deferSerial = function(){
     called = true
 
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
-    process.nextTick(function(){
+    nextTick(function(){
       fiber._defered = false
       if(fiber._syncIsTerminated) return
       if(err){
@@ -128,7 +130,7 @@ sync.deferParallel = function(){
   // Returning asynchronous callback.
   return function(err, result){
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
-    process.nextTick(function(){
+    nextTick(function(){
       if(fiber._syncIsTerminated) return
       // Error in any of parallel call will result in aborting all of the calls.
       if(data.errorHasBeenThrown) return
@@ -168,7 +170,7 @@ sync.defersSerial = function(){
     called = true
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     var args = Array.prototype.slice.call(arguments, 1)
-    process.nextTick(function(){
+    nextTick(function(){
       fiber._defered = false
       if(fiber._syncIsTerminated) return
       if (err) {
@@ -204,7 +206,7 @@ sync.defersParallel = function(){
   return function(err) {
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     var args = Array.prototype.slice.call(arguments, 1)
-    process.nextTick(function(){
+    nextTick(function(){
       if(fiber._syncIsTerminated) return
 
       // Error in any of parallel call will result in aborting all of the calls.
@@ -248,7 +250,7 @@ sync.parallel = function(cb){
     // This might happen if the user intended to enumerate an array within the
     // callback, calling `defer` once per array item, but the array was empty.
     if (!fiber._syncParallel.called) {
-      process.nextTick(function(){
+      nextTick(function(){
         // Return an empty array to represent that there were no results.        
         if(!fiber._syncIsTerminated) fiber.run([])
       })
