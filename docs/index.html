@@ -316,7 +316,7 @@ sync.fiber(function() {
   // Returns [1,2,3]
   var results = sync.await(
     read(1, 2, 3, sync.defers()))
-  // Returns {a: 1, b: 2, c: 3}
+  // Returns {a: 4, b: 5, c: 6}
   var namedResults = sync.await(
     read(4, 5, 6, sync.defers('a', 'b', 'c')))
 })
