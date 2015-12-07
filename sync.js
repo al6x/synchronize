@@ -251,7 +251,7 @@ sync.parallel = function(cb){
     // callback, calling `defer` once per array item, but the array was empty.
     if (!fiber._syncParallel.called) {
       nextTick(function(){
-        // Return an empty array to represent that there were no results.        
+        // Return an empty array to represent that there were no results.
         if(!fiber._syncIsTerminated) fiber.run([])
       })
     }
@@ -259,11 +259,31 @@ sync.parallel = function(cb){
   }
 }
 
+function decorateError(error, callStack){
+  var errorStack = error.stack;
+  Object.defineProperties(error, {
+    stack: {
+      get: function () {
+        var stack = errorStack;
+        if (callStack) {
+          stack += '\nRethrown: ' + callStack.substring(5);
+        }
+        return stack;
+      }
+    }
+  });
+  return error;
+}
+
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
 // if `done` not provided it will be just rethrown.
 sync.fiber = function(cb, done){
   var that = this
+  if (done){
+    callStack = {};
+    Error.captureStackTrace(callStack, this.fiber);
+  }
   var fiber = Fiber(function(){
     // Prevent restart fiber
     if (Fiber.current._started) return
@@ -273,7 +293,7 @@ sync.fiber = function(cb, done){
         result = cb.call(that)
         Fiber.current._syncIsTerminated = true
       } catch (error){
-        return done(error)
+        return done(decorateError(error, callStack.stack));
       }
       done(null, result)
     } else {
