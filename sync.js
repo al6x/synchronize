@@ -280,10 +280,6 @@ function decorateError(error, callStack){
 // if `done` not provided it will be just rethrown.
 sync.fiber = function(cb, done){
   var that = this
-  if (done){
-    callStack = {};
-    Error.captureStackTrace(callStack, this.fiber);
-  }
   var fiber = Fiber(function(){
     // Prevent restart fiber
     if (Fiber.current._started) return
@@ -292,8 +288,8 @@ sync.fiber = function(cb, done){
       try {
         result = cb.call(that)
         Fiber.current._syncIsTerminated = true
-      } catch (error){
-        return done(decorateError(error, callStack.stack));
+      } catch (error) {
+        return done(decorateError(error, Fiber.current._callStack.stack))
       }
       done(null, result)
     } else {
@@ -302,6 +298,10 @@ sync.fiber = function(cb, done){
       Fiber.current._syncIsTerminated = true
     }
   })
+  if (done) {
+      fiber._callStack = {}
+      Error.captureStackTrace(fiber._callStack, this.fiber)
+  }
   fiber.run()
   fiber._started = true
 }
