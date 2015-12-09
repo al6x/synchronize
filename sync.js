@@ -264,11 +264,10 @@ function decorateError(error, callStack){
   Object.defineProperties(error, {
     stack: {
       get: function () {
-        var stack = errorStack;
-        if (callStack) {
-          stack += '\nRethrown: ' + callStack.substring(5);
+        if (!callStack) {
+            return errorStack;
         }
-        return stack;
+        return [errorStack, callStack.substring(callStack.indexOf('\n') + 1)].join('\n')
       }
     }
   });
