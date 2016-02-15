@@ -93,8 +93,8 @@ sync.deferWithTimeout = function(timeout, message){
 sync.deferSerial = function(){
   var fiber = Fiber.current
   if(!fiber) throw new Error("no current Fiber, defer can't be used without Fiber!")
-  if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
-  fiber._defered = true
+  // if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
+  // fiber._defered = true
   // Prevent recursive call
   var called = false
   // Returning asynchronous callback.
@@ -104,7 +104,7 @@ sync.deferSerial = function(){
 
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     nextTick(function(){
-      fiber._defered = false
+      // fiber._defered = false
       if(fiber._syncIsTerminated) return
       if(err){
         // Resuming fiber and throwing error.
@@ -157,8 +157,8 @@ sync.defers = function(){
 sync.defersSerial = function(){
   var fiber = Fiber.current;
   if(!fiber) throw new Error("no current Fiber, defer can't be used without Fiber!")
-  if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
-  fiber._defered = true
+  // if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
+  // fiber._defered = true
 
   var kwds = Array.prototype.slice.call(arguments)
 
@@ -171,7 +171,7 @@ sync.defersSerial = function(){
     // Wrapping in nextTick as a safe measure against not asynchronous usage.
     var args = Array.prototype.slice.call(arguments, 1)
     nextTick(function(){
-      fiber._defered = false
+      // fiber._defered = false
       if(fiber._syncIsTerminated) return
       if (err) {
         // Resuming fiber and throwing error.
@@ -251,7 +251,7 @@ sync.parallel = function(cb){
     // callback, calling `defer` once per array item, but the array was empty.
     if (!fiber._syncParallel.called) {
       nextTick(function(){
-        // Return an empty array to represent that there were no results.        
+        // Return an empty array to represent that there were no results.
         if(!fiber._syncIsTerminated) fiber.run([])
       })
     }
