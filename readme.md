@@ -20,5 +20,7 @@ Contributors:
 Other resources:
 
 - [Patterns and anti-patterns using synchronize.js](https://mixmax.com/blog/node-fibers-using-synchronize-js)
+- [synchronize-iterate: Native iteration over cursor-like objects with synchronize.js](https://github.com/mixmaxhq/synchronize-iterate)
+- [synchronize-pool: Concurrent control of fibers on a per-pool basis with synchronize.js](https://github.com/mixmaxhq/synchronize-pool)
 
 Copyright (c) Alexey Petrushin, http://alex-craft.com, released under the MIT license.
