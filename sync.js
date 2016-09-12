@@ -259,6 +259,21 @@ sync.parallel = function(cb){
   }
 }
 
+function decorateError(error, callStack){
+  var errorStack = error.stack;
+  Object.defineProperties(error, {
+    stack: {
+      get: function () {
+        if (!callStack) {
+            return errorStack;
+        }
+        return [errorStack, callStack.substring(callStack.indexOf('\n') + 1)].join('\n')
+      }
+    }
+  });
+  return error;
+}
+
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
 // if `done` not provided it will be just rethrown.
@@ -272,8 +287,8 @@ sync.fiber = function(cb, done){
       try {
         result = cb.call(that)
         Fiber.current._syncIsTerminated = true
-      } catch (error){
-        return done(error)
+      } catch (error) {
+        return done(decorateError(error, Fiber.current._callStack.stack))
       }
       done(null, result)
     } else {
@@ -282,6 +297,10 @@ sync.fiber = function(cb, done){
       Fiber.current._syncIsTerminated = true
     }
   })
+  if (done) {
+      fiber._callStack = {}
+      Error.captureStackTrace(fiber._callStack, this.fiber)
+  }
   fiber.run()
   fiber._started = true
 }
