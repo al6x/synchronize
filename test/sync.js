@@ -404,18 +404,38 @@ describe('Control Flow', function(){
     setTimeout(function() {
       expect(called).to.eql(1)
       done()
-    }, 10);
+    }, 10)
   })
 
   it('should throw error when not matched defer-await pair', function(done){
     sync.fiber(function(){
-	    process.nextTick(sync.defer());
+      process.nextTick(sync.defer())
       expect(function() { process.nextTick(sync.defer()) }).to.throw(Error)
       sync.await()
-	    process.nextTick(sync.defers());
+      process.nextTick(sync.defers())
       expect(function() { process.nextTick(sync.defers()) }).to.throw(Error)
       sync.await()
     }, done)
+  })
+
+  it('should have full error stack', function(done) {
+    var raise = function(cb) {
+      setTimeout(function() {
+          cb(new Error('some'))
+      }, 1)
+    }
+    var re = /.* \(.*\/test\/sync.js:([0-9]+):([0-9]+)\)/
+    var s1 = new Error().stack.split('\n')[1]
+    var exp = parseInt(re.exec(s1)[1], 10)
+    sync.fiber(function() {
+      raise(sync.defer())
+      sync.await()
+    }, function(err) {
+      expect(err).to.exist
+      var line = parseInt(re.exec(err.stack.split('\n')[4])[1], 10)
+      expect(line).to.eql(exp + 2)
+      done()
+    })
   })
 
   beforeEach(function(){
