@@ -432,7 +432,15 @@ describe('Control Flow', function(){
       sync.await()
     }, function(err) {
       expect(err).to.exist
-      var line = parseInt(re.exec(err.stack.split('\n')[4])[1], 10)
+      var line
+      if (err.stack.split('\n').slice(2).some(function(l) {
+        var m = re.exec(l)
+        if (!m) {
+            return
+        }
+        line = parseInt(m[1], 10)
+        return true
+      }))
       expect(line).to.eql(exp + 2)
       done()
     })
