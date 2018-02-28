@@ -87,7 +87,7 @@ describe('Control Flow', function(){
     };
     fn = sync(fn)
     sync.fiber(function(){
-      var fnCall = fn({ returnErrorValue: true });
+      var fnCall = fn(sync.returnErrorValue);
       var err = fnCall.error;
       expect(err.message).to.eql('an error')
     }, done)

@@ -288,6 +288,9 @@ function decorateError(error, callStack){
   return error;
 }
 
+// Config param to return error with result on sync.fiber
+sync.returnErrorValue = { returnErrorValue: true }
+
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
 // if `done` not provided it will be just rethrown.
