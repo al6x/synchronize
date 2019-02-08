@@ -4,7 +4,7 @@ Documentation [http://alexeypetrushin.github.com/synchronize](http://alexeypetru
 
 Installation `npm install synchronize`
 
-![Build Status](https://travis-ci.org/alexeypetrushin/synchronize.svg)
+[![Build Status](https://travis-ci.org/alexeypetrushin/synchronize.svg)](https://travis-ci.org/alexeypetrushin/synchronize)
 
 Contributors:
 
