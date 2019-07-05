@@ -264,6 +264,7 @@ function decorateError(error, callStack){
     var errorStack = error.stack;
     Object.defineProperties(error, {
       stack: {
+        configurable: true,
         get: function () {
           if (!callStack) {
             return errorStack;
