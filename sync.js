@@ -260,17 +260,20 @@ sync.parallel = function(cb){
 }
 
 function decorateError(error, callStack){
-  var errorStack = error.stack;
-  Object.defineProperties(error, {
-    stack: {
-      get: function () {
-        if (!callStack) {
+  if (typeof error === 'object') {
+    var errorStack = error.stack;
+    Object.defineProperties(error, {
+      stack: {
+        configurable: true,
+        get: function () {
+          if (!callStack) {
             return errorStack;
+          }
+          return [errorStack, callStack.substring(callStack.indexOf('\n') + 1)].join('\n')
         }
-        return [errorStack, callStack.substring(callStack.indexOf('\n') + 1)].join('\n')
       }
-    }
-  });
+    });
+  }
   return error;
 }
 
