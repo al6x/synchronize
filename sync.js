@@ -36,10 +36,20 @@ sync.syncFn = function(fn){
   if(fn._synchronized) return fn
 
   var syncFn = function(){
+    var lastArgument = arguments[arguments.length - 1];
+
     // Using fibers only if there's active fiber and callback not provided explicitly.
-    if(Fiber.current && (typeof arguments[arguments.length-1] !== 'function')){
+    if(Fiber.current && (typeof lastArgument !== 'function')){
       // Calling asynchronous function with our special fiber-aware callback.
-      Array.prototype.push.call(arguments, sync.defer())
+      var returnErrorValue = false;
+
+      // Check for config as last argument
+      if (typeof lastArgument === 'object' && lastArgument.hasOwnProperty("returnErrorValue")) {
+        returnErrorValue = lastArgument.returnErrorValue;
+        Array.prototype.pop.call(arguments);
+      }
+
+      Array.prototype.push.call(arguments, sync.defer(returnErrorValue))
       fn.apply(this, arguments)
 
       // Waiting for asynchronous result.
@@ -59,10 +69,10 @@ sync.syncFn = function(fn){
 sync.await = Fiber.yield
 
 // Creates fiber-aware asynchronous callback resuming current fiber when it will be finished.
-sync.defer = function(){
+sync.defer = function(returnErrorValue){
   if(!Fiber.current) throw new Error("no current Fiber, defer can't be used without Fiber!")
   if(Fiber.current._syncParallel) return sync.deferParallel()
-  else return sync.deferSerial()
+  else return sync.deferSerial(returnErrorValue)
 }
 
 // Exactly the same as defer, but additionally it triggers an error if there's no response
@@ -90,7 +100,7 @@ sync.deferWithTimeout = function(timeout, message){
 }
 
 //
-sync.deferSerial = function(){
+sync.deferSerial = function(returnErrorValue){
   var fiber = Fiber.current
   if(!fiber) throw new Error("no current Fiber, defer can't be used without Fiber!")
   // if(fiber._defered) throw new Error("invalid usage, should be clear previous defer!")
@@ -106,7 +116,11 @@ sync.deferSerial = function(){
     nextTick(function(){
       // fiber._defered = false
       if(fiber._syncIsTerminated) return
-      if(err){
+
+      if (returnErrorValue) {
+        fiber.run({ result: result, error: err });
+      }
+      else if(err){
         // Resuming fiber and throwing error.
         fiber.throwInto(err)
       }else{
@@ -276,6 +290,9 @@ function decorateError(error, callStack){
   }
   return error;
 }
+
+// Config param to return error with result on sync.fiber
+sync.returnErrorValue = { returnErrorValue: true }
 
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
