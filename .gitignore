@@ -3,3 +3,4 @@
 Thumbs.db
 tmp/*
 node_modules
+package-lock.json
