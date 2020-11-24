@@ -278,9 +278,12 @@ function decorateError(error, callStack){
 }
 
 // We might have multiple instances of the lib linked from multiple dependency paths. Prefix to prevent collisions.
-const fiberIdPrefix = Math.round(Math.random() * Math.pow(10, 16)).toString(36) + '-';
-let fiberIds = 1;
-const fiberHooks = [];
+const fiberIdPrefix = Math.round(Math.random() * Math.pow(10, 16)).toString(36) + '-'
+let fiberIds = 1
+if (!global['synchronize-fiberHooks-v1']) {
+  global['synchronize-fiberHooks-v1'] = []
+}
+const fiberHooks = global['synchronize-fiberHooks-v1']
 
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
