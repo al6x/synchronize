@@ -338,7 +338,7 @@ sync.fiber = function(cb, done){
   fiber._started = true
 }
 
-sync.addFiberSpawnTerminateHook = (hook) => {
+sync.addFiberHooks = (hook) => {
   fiberHooks.push(hook)
 };
 
