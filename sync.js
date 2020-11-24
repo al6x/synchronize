@@ -1,5 +1,5 @@
 /*jshint node: true, indent:2, loopfunc: true, asi: true, undef:true*/
-
+var async_hooks = require('async_hooks');
 var Fiber = require('fibers')
 
 // Takes function and returns its synchronized version, it's still backward compatible and
@@ -277,26 +277,53 @@ function decorateError(error, callStack){
   return error;
 }
 
+// We might have multiple instances of the lib linked from multiple dependency paths. Prefix to prevent collisions.
+const fiberIdPrefix = Math.round(Math.random() * Math.pow(10, 16)).toString(36) + '-';
+let fiberIds = 1;
+const fiberHooks = [];
+
 // Executes `cb` within `Fiber`, when it finish it will call `done` callback.
 // If error will be thrown during execution, this error will be catched and passed to `done`,
 // if `done` not provided it will be just rethrown.
 sync.fiber = function(cb, done){
   var that = this
+  var eid = async_hooks.executionAsyncId()
+  var parentFiberId = Fiber.current ? Fiber.current._fiberId : undefined
   var fiber = Fiber(function(){
     // Prevent restart fiber
     if (Fiber.current._started) return
+    var _fiberId = Fiber.current._fiberId = fiberIdPrefix + fiberIds++;
+    fiberHooks.forEach(h => h.spawn(_fiberId, parentFiberId, eid))
     if (done) {
       var result
       try {
         result = cb.call(that)
         Fiber.current._syncIsTerminated = true
       } catch (error) {
-        return done(decorateError(error, Fiber.current._callStack.stack))
+        try {
+          return done(decorateError(error, Fiber.current._callStack.stack))
+        } catch(e) {
+          throw e;
+        } finally {
+          fiberHooks.forEach(h => h.terminate(_fiberId, parentFiberId, eid))
+        }
       }
-      done(null, result)
+      try {
+        done(null, result)
+      } catch(e) {
+        throw e;
+      } finally {
+        fiberHooks.forEach(h => h.terminate(_fiberId, parentFiberId, eid))
+      }
     } else {
       // Don't catch errors if done not provided!
-      cb.call(that)
+      try {
+        cb.call(that)
+      } catch (e) {
+        throw(e);
+      } finally {
+        fiberHooks.forEach(h => h.terminate(_fiberId, parentFiberId, eid))
+      }
       Fiber.current._syncIsTerminated = true
     }
   })
@@ -307,6 +334,15 @@ sync.fiber = function(cb, done){
   fiber.run()
   fiber._started = true
 }
+
+sync.addFiberSpawnTerminateHook = (hook) => {
+  fiberHooks.push(hook)
+};
+
+sync.getCurrentFiberId = () => {
+  const f = Fiber.current
+  return f ? f._fiberId : 0
+};
 
 // Asynchronous wrapper for mocha.js tests.
 //
