@@ -1,14 +1,14 @@
 {
   "name": "synchronize",
   "main": "./sync",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "homepage": "http://alexeypetrushin.github.com/synchronize",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexeypetrushin/synchronize.git"
+    "url": "https://github.com/olisto/synchronize.git"
   },
   "dependencies": {
-    "fibers": "^3.0.0"
+    "fibers": "^5.0.0"
   },
   "devDependencies": {
     "mocha": "1.0.x",
